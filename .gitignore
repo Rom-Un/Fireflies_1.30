@@ -29,3 +29,9 @@ data/encryption.key
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# Replit specific
+.replit.nix
+.cache/
+.config/
+.upm/

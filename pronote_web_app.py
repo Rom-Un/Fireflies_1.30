@@ -2921,4 +2921,10 @@ def inject_now():
     return {'now': datetime.datetime.now()}
 
 if __name__ == '__main__':
-    app.run(host= '0.0.0.0', port=5000)
+    # Check if running on Replit
+    if 'REPLIT_DB_URL' in os.environ:
+        # Use Replit's environment
+        app.run(host='0.0.0.0', port=8080)
+    else:
+        # Local development
+        app.run(host='0.0.0.0', port=5000)

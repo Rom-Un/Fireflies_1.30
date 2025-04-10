@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "fireflies"
+version = "1.30.0"
+description = "A web application to access Pronote data"
+authors = ["Your Name <your.email@example.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pronotepy = "*"
+pycryptodome = "*"
+beautifulsoup4 = "*"
+requests = "*"
+flask = "*"
+icalendar = "*"
+pytz = "*"
+uuid = "*"
+python-dateutil = "*"
+nltk = "*"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
