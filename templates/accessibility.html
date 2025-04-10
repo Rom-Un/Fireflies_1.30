@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Accessibility Settings{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">{{ _('Accessibility Settings') }}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        {{ _('Customize your experience with these accessibility options to make Fireflies work better for you.') }}
+                    </div>
+
+                    <form id="accessibilityForm">
+                        <!-- Display Settings -->
+                        <h4 class="mt-4 mb-3">{{ _('Display Settings') }}</h4>
+                        
+                        <!-- Dark Mode -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="darkModeToggle" 
+                                       {% if user_settings.dark_mode %}checked{% endif %}>
+                                <label class="form-check-label" for="darkModeToggle">
+                                    {{ _('Dark Mode') }}
+                                </label>
+                            </div>
+                            <div class="form-text text-muted">
+                                {{ _('Enable dark mode for reduced eye strain in low-light environments.') }}
+                            </div>
+                        </div>
+                        
+                        <!-- High Contrast -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="highContrastToggle" 
+                                       {% if user_settings.high_contrast %}checked{% endif %}>
+                                <label class="form-check-label" for="highContrastToggle">
+                                    {{ _('High Contrast') }}
+                                </label>
+                            </div>
+                            <div class="form-text text-muted">
+                                {{ _('Increase contrast for better readability.') }}
+                            </div>
+                        </div>
+                        
+                        <!-- Font Size -->
+                        <div class="mb-4">
+                            <label for="fontSizeRange" class="form-label">{{ _('Font Size') }}</label>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range w-75" min="80" max="150" step="10" 
+                                       id="fontSizeRange" value="{{ user_settings.font_size|default(100) }}">
+                                <span class="ms-3" id="fontSizeValue">{{ user_settings.font_size|default(100) }}%</span>
+                            </div>
+                            <div class="form-text text-muted">
+                                {{ _('Adjust the text size for better readability.') }}
+                            </div>
+                        </div>
+                        
+                        <!-- Reading Settings -->
+                        <h4 class="mt-4 mb-3">{{ _('Reading Settings') }}</h4>
+                        
+                        <!-- Dyslexia Friendly Font -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="dyslexiaFontToggle" 
+                                       {% if user_settings.dyslexia_font %}checked{% endif %}>
+                                <label class="form-check-label" for="dyslexiaFontToggle">
+                                    {{ _('Dyslexia Friendly Font') }}
+                                </label>
+                            </div>
+                            <div class="form-text text-muted">
+                                {{ _('Use a font designed to be more readable for people with dyslexia.') }}
+                            </div>
+                        </div>
+                        
+                        <!-- Line Spacing -->
+                        <div class="mb-4">
+                            <label for="lineSpacingRange" class="form-label">{{ _('Line Spacing') }}</label>
+                            <div class="d-flex align-items-center">
+                                <input type="range" class="form-range w-75" min="100" max="200" step="10" 
+                                       id="lineSpacingRange" value="{{ user_settings.line_spacing|default(130) }}">
+                                <span class="ms-3" id="lineSpacingValue">{{ user_settings.line_spacing|default(130) }}%</span>
+                            </div>
+                            <div class="form-text text-muted">
+                                {{ _('Adjust the space between lines for easier reading.') }}
+                            </div>
+                        </div>
+                        
+                        <!-- Motion Settings -->
+                        <h4 class="mt-4 mb-3">{{ _('Motion Settings') }}</h4>
+                        
+                        <!-- Reduce Animations -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="reduceAnimationsToggle" 
+                                       {% if user_settings.reduce_animations %}checked{% endif %}>
+                                <label class="form-check-label" for="reduceAnimationsToggle">
+                                    {{ _('Reduce Animations') }}
+                                </label>
+                            </div>
+                            <div class="form-text text-muted">
+                                {{ _('Minimize animations and transitions for reduced motion sensitivity.') }}
+                            </div>
+                        </div>
+                        
+                        <!-- Focus Mode -->
+                        <div class="mb-4">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="focusModeToggle" 
+                                       {% if user_settings.focus_mode %}checked{% endif %}>
+                                <label class="form-check-label" for="focusModeToggle">
+                                    {{ _('Focus Mode') }}
+                                </label>
+                            </div>
+                            <div class="form-text text-muted">
+                                {{ _('Reduce distractions by simplifying the interface.') }}
+                            </div>
+                        </div>
+                        
+                        <!-- Save Button -->
+                        <div class="mt-4">
+                            <button type="button" id="saveAccessibilitySettings" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>{{ _('Save Settings') }}
+                            </button>
+                            <div id="saveStatus" class="mt-2"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update font size value display
+    const fontSizeRange = document.getElementById('fontSizeRange');
+    const fontSizeValue = document.getElementById('fontSizeValue');
+    
+    fontSizeRange.addEventListener('input', function() {
+        fontSizeValue.textContent = this.value + '%';
+    });
+    
+    // Update line spacing value display
+    const lineSpacingRange = document.getElementById('lineSpacingRange');
+    const lineSpacingValue = document.getElementById('lineSpacingValue');
+    
+    lineSpacingRange.addEventListener('input', function() {
+        lineSpacingValue.textContent = this.value + '%';
+    });
+    
+    // Save settings
+    document.getElementById('saveAccessibilitySettings').addEventListener('click', function() {
+        const settings = {
+            dark_mode: document.getElementById('darkModeToggle').checked,
+            high_contrast: document.getElementById('highContrastToggle').checked,
+            font_size: parseInt(document.getElementById('fontSizeRange').value),
+            dyslexia_font: document.getElementById('dyslexiaFontToggle').checked,
+            line_spacing: parseInt(document.getElementById('lineSpacingRange').value),
+            reduce_animations: document.getElementById('reduceAnimationsToggle').checked,
+            focus_mode: document.getElementById('focusModeToggle').checked
+        };
+        
+        // Save each setting individually
+        const savePromises = Object.entries(settings).map(([setting, value]) => {
+            return fetch('/api/settings/accessibility', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ setting, value })
+            }).then(response => response.json());
+        });
+        
+        // Show saving status
+        const saveStatus = document.getElementById('saveStatus');
+        saveStatus.innerHTML = '<div class="alert alert-info">{{ _("Saving settings...") }}</div>';
+        
+        // Wait for all settings to be saved
+        Promise.all(savePromises)
+            .then(results => {
+                const allSuccessful = results.every(result => result.success);
+                
+                if (allSuccessful) {
+                    saveStatus.innerHTML = '<div class="alert alert-success">{{ _("Settings saved successfully!") }}</div>';
+                    
+                    // Apply settings immediately
+                    applyAccessibilitySettings(settings);
+                    
+                    // Hide the success message after 3 seconds
+                    setTimeout(() => {
+                        saveStatus.innerHTML = '';
+                    }, 3000);
+                } else {
+                    saveStatus.innerHTML = '<div class="alert alert-danger">{{ _("Error saving some settings. Please try again.") }}</div>';
+                }
+            })
+            .catch(error => {
+                console.error('Error saving settings:', error);
+                saveStatus.innerHTML = '<div class="alert alert-danger">{{ _("Error saving settings. Please try again.") }}</div>';
+            });
+    });
+    
+    // Apply settings function
+    function applyAccessibilitySettings(settings) {
+        // Apply dark mode
+        if (settings.dark_mode) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+        
+        // Apply high contrast
+        if (settings.high_contrast) {
+            document.body.classList.add('high-contrast');
+        } else {
+            document.body.classList.remove('high-contrast');
+        }
+        
+        // Apply font size
+        document.documentElement.style.setProperty('--font-size-multiplier', settings.font_size / 100);
+        
+        // Apply dyslexia font
+        if (settings.dyslexia_font) {
+            document.body.classList.add('dyslexia-font');
+        } else {
+            document.body.classList.remove('dyslexia-font');
+        }
+        
+        // Apply line spacing
+        document.documentElement.style.setProperty('--line-spacing-multiplier', settings.line_spacing / 100);
+        
+        // Apply reduced animations
+        if (settings.reduce_animations) {
+            document.body.classList.add('reduce-animations');
+        } else {
+            document.body.classList.remove('reduce-animations');
+        }
+        
+        // Apply focus mode
+        if (settings.focus_mode) {
+            document.body.classList.add('focus-mode');
+        } else {
+            document.body.classList.remove('focus-mode');
+        }
+    }
+    
+    // Apply settings on page load
+    const initialSettings = {
+        dark_mode: {{ 'true' if user_settings.dark_mode else 'false' }},
+        high_contrast: {{ 'true' if user_settings.high_contrast else 'false' }},
+        font_size: {{ user_settings.font_size|default(100) }},
+        dyslexia_font: {{ 'true' if user_settings.dyslexia_font else 'false' }},
+        line_spacing: {{ user_settings.line_spacing|default(130) }},
+        reduce_animations: {{ 'true' if user_settings.reduce_animations else 'false' }},
+        focus_mode: {{ 'true' if user_settings.focus_mode else 'false' }}
+    };
+    
+    applyAccessibilitySettings(initialSettings);
+});
+</script>
+{% endblock %}

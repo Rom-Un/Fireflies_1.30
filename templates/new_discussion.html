@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('New Discussion') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ _('New Discussion') }}</h1>
+        <a href="{{ url_for('discussions') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> {{ _('Back to Discussions') }}
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <form action="{{ url_for('new_discussion') }}" method="post">
+                <div class="mb-3">
+                    <label for="subject" class="form-label">{{ _('Subject') }}</label>
+                    <input type="text" class="form-control" id="subject" name="subject" required>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="recipients" class="form-label">{{ _('Recipients') }}</label>
+                    <select class="form-select" id="recipients" name="recipients" multiple required>
+                        {% if recipients %}
+                            {% for recipient in recipients %}
+                                <option value="{{ recipient.id }}">{{ recipient.name }} ({{ recipient.type }})</option>
+                            {% endfor %}
+                        {% endif %}
+                    </select>
+                    <div class="form-text">{{ _('Hold Ctrl (or Cmd on Mac) to select multiple recipients') }}</div>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="message" class="form-label">{{ _('Message') }}</label>
+                    <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">{{ _('Send') }}</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Add Bootstrap's select2 or similar for better multiple select experience
+    document.addEventListener('DOMContentLoaded', function() {
+        // If you have select2 or similar library, initialize it here
+        // Example: $('#recipients').select2();
+    });
+</script>
+{% endblock %}

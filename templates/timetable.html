@@ -1,0 +1,947 @@
+{% extends "base.html" %}
+
+{% block title %}Emploi du temps - Fireflies{% endblock %}
+
+{% block content %}
+<h1 class="page-title">
+    <i class="fas fa-calendar-alt me-2"></i>Emploi du temps
+</h1>
+
+<!-- View toggle buttons -->
+<div class="mb-4">
+    <ul class="nav nav-tabs" id="timetableTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule-view" type="button" role="tab" aria-controls="schedule-view" aria-selected="true">
+                <i class="fas fa-calendar-alt me-1"></i>Emploi du temps
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="study-tab" data-bs-toggle="tab" data-bs-target="#study-view" type="button" role="tab" aria-controls="study-view" aria-selected="false">
+                <i class="fas fa-calendar-check me-1"></i>Planning d'étude
+            </button>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content" id="timetableTabsContent">
+    <!-- Regular Timetable View -->
+    <div class="tab-pane fade show active" id="schedule-view" role="tabpanel" aria-labelledby="schedule-tab">
+
+<!-- View toggle buttons -->
+<div class="mb-4">
+    <ul class="nav nav-tabs" id="timetableTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="schedule-tab" data-bs-toggle="tab" data-bs-target="#schedule-view" type="button" role="tab" aria-controls="schedule-view" aria-selected="true">
+                <i class="fas fa-calendar-alt me-1"></i>Emploi du temps
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="study-tab" data-bs-toggle="tab" data-bs-target="#study-view" type="button" role="tab" aria-controls="study-view" aria-selected="false">
+                <i class="fas fa-calendar-check me-1"></i>Planning d'étude
+            </button>
+        </li>
+    </ul>
+</div>
+
+<div class="tab-content" id="timetableTabsContent">
+    <!-- Regular Timetable View -->
+    <div class="tab-pane fade show active" id="schedule-view" role="tabpanel" aria-labelledby="schedule-tab">
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-day me-2"></i>Sélectionner une date
+                    </h5>
+                    <div>
+                        <a href="{{ url_for('timetable', date=today, view=view_type) }}" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-calendar-day me-1"></i>Aujourd'hui
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <form method="get" action="{{ url_for('timetable') }}" class="row g-3 align-items-center">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-calendar"></i></span>
+                            <input type="date" class="form-control" id="date" name="date" value="{{ date }}">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-1"></i>Appliquer
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="btn-group" role="group">
+                            <a href="{{ url_for('timetable', date=date, view='day') }}"
+                               class="btn btn-outline-primary {{ 'active' if view_type == 'day' else '' }}">
+                                <i class="fas fa-calendar-day me-1"></i>Vue journalière
+                            </a>
+                            <a href="{{ url_for('timetable', date=date, view='week') }}"
+                               class="btn btn-outline-primary {{ 'active' if view_type == 'week' else '' }}">
+                                <i class="fas fa-calendar-week me-1"></i>Vue hebdomadaire
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="btn-group float-end" role="group">
+                            {% if view_type == 'week' %}
+                                <a href="{{ url_for('timetable', date=prev_date, view='week') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-chevron-left me-1"></i>Semaine précédente
+                                </a>
+                                <a href="{{ url_for('timetable', date=next_date, view='week') }}" class="btn btn-outline-primary">
+                                    Semaine suivante<i class="fas fa-chevron-right ms-1"></i>
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('timetable', date=prev_date, view='day') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-chevron-left me-1"></i>Jour précédent
+                                </a>
+                                <a href="{{ url_for('timetable', date=next_date, view='day') }}" class="btn btn-outline-primary">
+                                    Jour suivant<i class="fas fa-chevron-right ms-1"></i>
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+{% if view_type == 'week' %}
+<!-- Week View -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-calendar-week me-2"></i>Planning Hebdomadaire
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if week_lessons %}
+            <ul class="nav nav-tabs mb-4" id="weekTabs" role="tablist">
+                {% for day_date in week_dates %}
+                    {% set day_id = day_date.strftime('%Y-%m-%d') %}
+                    {% set day_name = day_date.strftime('%A')|replace('Monday', 'Lundi')|replace('Tuesday', 'Mardi')|replace('Wednesday', 'Mercredi')|replace('Thursday', 'Jeudi')|replace('Friday', 'Vendredi')|replace('Saturday', 'Samedi')|replace('Sunday', 'Dimanche') %}
+                    {% set is_today = day_date.strftime('%Y-%m-%d') == today %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {{ 'active' if loop.index == 1 else '' }} {{ 'text-primary fw-bold' if is_today else '' }}"
+                                id="day-{{ day_id }}-tab"
+                                data-bs-toggle="tab"
+                                data-bs-target="#day-{{ day_id }}"
+                                type="button"
+                                role="tab">
+                            {{ day_name }}
+                            {% if is_today %}
+                                <i class="fas fa-circle text-primary" style="font-size: 0.5rem; vertical-align: super;"></i>
+                            {% endif %}
+                        </button>
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <div class="tab-content" id="weekTabContent">
+                {% for day_date in week_dates %}
+                    {% set day_id = day_date.strftime('%Y-%m-%d') %}
+                    {% set day_data = week_lessons[day_id] %}
+                    <div class="tab-pane fade {{ 'show active' if loop.index == 1 else '' }}"
+                         id="day-{{ day_id }}"
+                         role="tabpanel">
+
+                        <h5 class="mb-3">{{ day_data.day_name|replace('Monday', 'Lundi')|replace('Tuesday', 'Mardi')|replace('Wednesday', 'Mercredi')|replace('Thursday', 'Jeudi')|replace('Friday', 'Vendredi')|replace('Saturday', 'Samedi')|replace('Sunday', 'Dimanche') }} ({{ day_id }})</h5>
+
+                        {% if day_data.lessons %}
+                            <div class="row">
+                                {% for lesson in day_data.lessons %}
+                                <div class="col-md-6 col-lg-4 mb-3">
+                                    <div class="card timetable-card h-100"
+                                         style="border-left-color: {{ lesson.color }};">
+                                        <div class="card-body">
+                                            <h5 class="timetable-subject">{{ lesson.subject }}</h5>
+                                            <div class="timetable-time mb-2">
+                                                <i class="fas fa-clock me-1"></i>{{ lesson.start }} - {{ lesson.end }}
+                                                <span class="badge bg-primary float-end">
+                                                    {{ (lesson.end|string|replace(':','')|int - lesson.start|string|replace(':','')|int) // 100 }}h{{ (lesson.end|string|replace(':','')|int - lesson.start|string|replace(':','')|int) % 100 }}
+                                                </span>
+                                            </div>
+                                            <div class="timetable-info">
+                                                {% if lesson.room %}
+                                                <p class="mb-1"><i class="fas fa-door-open me-1"></i>Salle: {{ lesson.room }}</p>
+                                                {% endif %}
+                                                {% if lesson.teacher %}
+                                                <p class="mb-0"><i class="fas fa-chalkboard-teacher me-1"></i>Professeur: {{ lesson.teacher }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-calendar-times text-muted" style="font-size: 3rem;"></i>
+                                <h5 class="mt-3">Pas de cours pour ce jour</h5>
+                                <p class="text-muted">C'est peut-être un week-end ou un jour férié.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Weekly Overview -->
+            <div class="mt-5">
+                <h5 class="mb-3">Aperçu Hebdomadaire</h5>
+
+                <!-- Subject Color Legend -->
+                <div class="mb-3">
+                    <h6 class="text-muted mb-2">Légende des Matières</h6>
+                    <div class="d-flex flex-wrap">
+                        {% set unique_subjects = {} %}
+                        {% for day_id, day_data in week_lessons.items() %}
+                            {% for lesson in day_data.lessons %}
+                                {% if lesson.subject not in unique_subjects %}
+                                    {% set _ = unique_subjects.update({lesson.subject: lesson.color}) %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+
+                        {% for subject, color in unique_subjects.items() %}
+                            <div class="me-3 mb-2">
+                                <span class="badge py-2 px-3 me-1" style="background-color: {{ color }};">
+                                    {{ subject }}
+                                </span>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%">Heure</th>
+                                {% for day_date in week_dates %}
+                                    <th>{{ day_date.strftime('%a')|replace('Mon', 'Lun')|replace('Tue', 'Mar')|replace('Wed', 'Mer')|replace('Thu', 'Jeu')|replace('Fri', 'Ven')|replace('Sat', 'Sam')|replace('Sun', 'Dim') }}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set time_slots = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00'] %}
+
+                            {% for time_slot in time_slots %}
+                                <tr>
+                                    <td>{{ time_slot }}</td>
+
+                                    {% for day_date in week_dates %}
+                                        {% set day_id = day_date.strftime('%Y-%m-%d') %}
+                                        {% set day_data = week_lessons[day_id] %}
+                                        <td>
+                                            {% for lesson in day_data.lessons %}
+                                                {% if lesson.start <= time_slot and lesson.end > time_slot %}
+                                                    <div class="p-1 text-white rounded" style="background-color: {{ lesson.color }};">
+                                                        {{ lesson.subject }}
+                                                    </div>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </td>
+                                    {% endfor %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-calendar-times text-muted" style="font-size: 4rem;"></i>
+                <h4 class="mt-3">Aucun cours trouvé pour la semaine sélectionnée</h4>
+                <p class="text-muted">Essayez de sélectionner une autre semaine ou vérifiez s'il s'agit d'une période de vacances.</p>
+                <a href="{{ url_for('timetable', date=today, view='week') }}" class="btn btn-primary mt-2">
+                    <i class="fas fa-calendar-week me-1"></i>Voir l'emploi du temps de cette semaine
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% else %}
+<!-- Day View -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-clock me-2"></i>Emploi du temps pour le {{ date }}
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if lessons %}
+            <div class="row">
+                {% for lesson in lessons %}
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card timetable-card h-100"
+                         style="border-left-color: {{ lesson.color }};">
+                        <div class="card-body">
+                            <h5 class="timetable-subject">{{ lesson.subject }}</h5>
+                            <div class="timetable-time mb-2">
+                                <i class="fas fa-clock me-1"></i>{{ lesson.start }} - {{ lesson.end }}
+                                <span class="badge bg-primary float-end">
+                                    {{ (lesson.end|string|replace(':','')|int - lesson.start|string|replace(':','')|int) // 100 }}h{{ (lesson.end|string|replace(':','')|int - lesson.start|string|replace(':','')|int) % 100 }}
+                                </span>
+                            </div>
+                            <div class="timetable-info">
+                                {% if lesson.room %}
+                                <p class="mb-1"><i class="fas fa-door-open me-1"></i>Salle: {{ lesson.room }}</p>
+                                {% endif %}
+                                {% if lesson.teacher %}
+                                <p class="mb-0"><i class="fas fa-chalkboard-teacher me-1"></i>Professeur: {{ lesson.teacher }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-4">
+                <i class="fas fa-calendar-times text-muted" style="font-size: 3rem;"></i>
+                <h5 class="mt-3">Pas de cours pour ce jour</h5>
+                <p class="text-muted">C'est peut-être un week-end ou un jour férié.</p>
+            </div>
+        {% endif %}
+
+            {% if lessons %}
+            <div class="mt-4">
+                <h6 class="text-muted mb-3">Vue Chronologique</h6>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="width: 15%">Heure</th>
+                                <th>Cours</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% set time_slots = [] %}
+                            {% for lesson in lessons %}
+                                {% set _ = time_slots.append({'time': lesson.start, 'type': 'start', 'lesson': lesson}) %}
+                                {% set _ = time_slots.append({'time': lesson.end, 'type': 'end', 'lesson': lesson}) %}
+                            {% endfor %}
+
+                            {% set sorted_slots = time_slots|sort(attribute='time') %}
+                            {% set active_lessons = [] %}
+
+                            {% for i in range(sorted_slots|length - 1) %}
+                                {% set current = sorted_slots[i] %}
+                                {% set next = sorted_slots[i+1] %}
+
+                                {% if current.type == 'start' %}
+                                    {% set _ = active_lessons.append(current.lesson) %}
+                                {% elif current.type == 'end' %}
+                                    {% set _ = active_lessons.remove(current.lesson) %}
+                                {% endif %}
+
+                                {% if active_lessons|length > 0 and current.time != next.time %}
+                                <tr>
+                                    <td>{{ current.time }} - {{ next.time }}</td>
+                                    <td>
+                                        {% for active in active_lessons %}
+                                        <span class="badge me-2 mb-1" style="background-color: {{ active.color }};">{{ active.subject }}</span>
+                                        {% endfor %}
+                                    </td>
+                                </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+    </div><!-- End of schedule-view -->
+
+    <!-- Study Schedule View -->
+    <div class="tab-pane fade" id="study-view" role="tabpanel" aria-labelledby="study-tab">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-calendar-plus me-2"></i>Votre Planning d'Étude</h5>
+                        <div>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#buildScheduleModal">
+                                <i class="fas fa-magic me-1"></i>Créer un Planning
+                            </button>
+                            <a href="{{ url_for('fireflies_routes.export_calendar') }}" class="btn btn-outline-primary ms-2">
+                                <i class="fas fa-file-export me-1"></i>Exporter
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if scheduled_sessions %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Heure</th>
+                                            <th>Matière</th>
+                                            <th>Durée</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for session in scheduled_sessions %}
+                                        <tr>
+                                            <td>{{ session.date }}</td>
+                                            <td>{{ session.start_time }} - {{ session.end_time }}</td>
+                                            <td>{{ session.subject }}</td>
+                                            <td>{{ session.duration }} minutes</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-danger delete-session-btn" data-session-id="{{ session.id }}">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-calendar-day text-muted" style="font-size: 4rem;"></i>
+                                <h4 class="mt-3">Aucune session d'étude planifiée</h4>
+                                <p class="text-muted">Utilisez le bouton "Créer un Planning" pour générer votre plan d'étude optimal</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Blocs de Temps d'Étude</h5>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addStudyBlockModal">
+                            <i class="fas fa-plus me-1"></i>Ajouter un Bloc
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        {% if study_blocks %}
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Jour</th>
+                                            <th>Heure de début</th>
+                                            <th>Heure de fin</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for block in study_blocks %}
+                                        <tr>
+                                            <td>{{ day_names[block.day_of_week] }}</td>
+                                            <td>{{ block.start_time }}</td>
+                                            <td>{{ block.end_time }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-danger delete-block-btn" data-block-id="{{ block.id }}">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-info-circle text-muted" style="font-size: 3rem;"></i>
+                                <h5 class="mt-3">Aucun bloc d'étude défini</h5>
+                                <p class="text-muted">Ajoutez des blocs pour indiquer quand vous êtes disponible pour étudier</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Préférences d'Étude</h5>
+                        <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#studyPreferencesModal">
+                            <i class="fas fa-cog me-1"></i>Configurer
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-brain me-2"></i>Préférences de Concentration</h6>
+                                <ul class="list-group list-group-flush mb-3">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Durée de session maximale
+                                        <span class="badge bg-primary rounded-pill">{{ study_preferences.max_session_duration|default('60') }} min</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        Pause entre les sessions
+                                        <span class="badge bg-primary rounded-pill">{{ study_preferences.break_duration|default('15') }} min</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-book me-2"></i>Priorités des Matières</h6>
+                                <ul class="list-group list-group-flush">
+                                    {% if subject_priorities %}
+                                        {% for subject in subject_priorities %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ subject.name }}
+                                            <span class="badge bg-{{ subject.priority_color }} rounded-pill">{{ subject.priority_label }}</span>
+                                        </li>
+                                        {% endfor %}
+                                    {% else %}
+                                        <li class="list-group-item text-center text-muted">
+                                            Aucune priorité définie
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- Modals for Study Schedule -->
+<!-- Build Schedule Modal -->
+<div class="modal fade" id="buildScheduleModal" tabindex="-1" aria-labelledby="buildScheduleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="buildScheduleModalLabel">Créer un Planning d'Étude</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="buildScheduleForm">
+                    <div class="mb-3">
+                        <label for="startDate" class="form-label">Date de début</label>
+                        <input type="date" class="form-control" id="startDate" name="start_date" value="{{ today }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="daysAhead" class="form-label">Nombre de jours</label>
+                        <input type="number" class="form-control" id="daysAhead" name="days_ahead" value="7" min="1" max="30">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="buildScheduleBtn">
+                    <i class="fas fa-magic me-1"></i>Créer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Study Block Modal -->
+<div class="modal fade" id="addStudyBlockModal" tabindex="-1" aria-labelledby="addStudyBlockModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addStudyBlockModalLabel">Ajouter un Bloc d'Étude</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addStudyBlockForm">
+                    <div class="mb-3">
+                        <label for="dayOfWeek" class="form-label">Jour de la semaine</label>
+                        <select class="form-select" id="dayOfWeek" name="day_of_week" required>
+                            <option value="0">Lundi</option>
+                            <option value="1">Mardi</option>
+                            <option value="2">Mercredi</option>
+                            <option value="3">Jeudi</option>
+                            <option value="4">Vendredi</option>
+                            <option value="5">Samedi</option>
+                            <option value="6">Dimanche</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="startTime" class="form-label">Heure de début</label>
+                        <input type="time" class="form-control" id="startTime" name="start_time" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="endTime" class="form-label">Heure de fin</label>
+                        <input type="time" class="form-control" id="endTime" name="end_time" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="addStudyBlockBtn">Ajouter</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Study Preferences Modal -->
+<div class="modal fade" id="studyPreferencesModal" tabindex="-1" aria-labelledby="studyPreferencesModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="studyPreferencesModalLabel">Préférences d'Étude</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="studyPreferencesForm">
+                    <div class="mb-3">
+                        <label for="maxSessionDuration" class="form-label">Durée de session maximale (minutes)</label>
+                        <input type="number" class="form-control" id="maxSessionDuration" name="max_session_duration" value="{{ study_preferences.max_session_duration|default(60) }}" min="15" max="180">
+                    </div>
+                    <div class="mb-3">
+                        <label for="breakDuration" class="form-label">Durée des pauses (minutes)</label>
+                        <input type="number" class="form-control" id="breakDuration" name="break_duration" value="{{ study_preferences.break_duration|default(15) }}" min="5" max="60">
+                    </div>
+                    <hr>
+                    <h6>Priorités des Matières</h6>
+                    <div id="subjectPriorities">
+                        {% if subject_priorities %}
+                            {% for subject in subject_priorities %}
+                            <div class="mb-3 row align-items-center">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="subject_names[]" value="{{ subject.name }}" placeholder="Nom de la matière">
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-select" name="subject_priorities[]">
+                                        <option value="high" {% if subject.priority_label == 'Haute' %}selected{% endif %}>Haute</option>
+                                        <option value="medium" {% if subject.priority_label == 'Moyenne' %}selected{% endif %}>Moyenne</option>
+                                        <option value="low" {% if subject.priority_label == 'Basse' %}selected{% endif %}>Basse</option>
+                                    </select>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="mb-3 row align-items-center">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" name="subject_names[]" placeholder="Nom de la matière">
+                                </div>
+                                <div class="col-md-6">
+                                    <select class="form-select" name="subject_priorities[]">
+                                        <option value="high">Haute</option>
+                                        <option value="medium" selected>Moyenne</option>
+                                        <option value="low">Basse</option>
+                                    </select>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <button type="button" class="btn btn-sm btn-outline-primary" id="addSubjectBtn">
+                        <i class="fas fa-plus me-1"></i>Ajouter une matière
+                    </button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="savePreferencesBtn">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Highlight the current time slot in the timeline
+        const now = new Date();
+        const currentTime = now.getHours().toString().padStart(2, '0') + ':' +
+                           now.getMinutes().toString().padStart(2, '0');
+        const currentDay = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+        const currentDayName = new Date().toLocaleDateString('fr-FR', { weekday: 'short' }); // Lun, Mar, etc.
+
+        // For day view timeline
+        const dayRows = document.querySelectorAll('.card:not(.mb-4) table:not(:last-child) tbody tr');
+        dayRows.forEach(row => {
+            const timeCell = row.querySelector('td:first-child');
+            if (timeCell) {
+                const timeRange = timeCell.textContent.trim();
+                const [start, end] = timeRange.split(' - ');
+
+                if (currentTime >= start && currentTime <= end) {
+                    row.classList.add('table-primary');
+                }
+            }
+        });
+
+        // For week view timeline
+        const weekRows = document.querySelectorAll('.table-responsive:last-child table tbody tr');
+        weekRows.forEach(row => {
+            const timeCell = row.querySelector('td:first-child');
+            if (timeCell) {
+                const timeSlot = timeCell.textContent.trim();
+
+                // Find the current day column (index is day of week + 1 because first column is time)
+                const today = new Date();
+                const dayOfWeek = today.getDay(); // 0 is Sunday, 1 is Monday, etc.
+                const columnIndex = dayOfWeek === 0 ? 7 : dayOfWeek; // Adjust for Sunday
+
+                // Get the cell for the current day and time
+                const currentCell = row.querySelector(`td:nth-child(${columnIndex + 1})`);
+
+                // Check if current time is in this time slot
+                if (currentCell && currentTime >= timeSlot && currentTime < getNextHour(timeSlot)) {
+                    currentCell.classList.add('bg-light');
+                    currentCell.classList.add('border-primary');
+                }
+            }
+        });
+
+        // Helper function to get the next hour
+        function getNextHour(timeStr) {
+            const hour = parseInt(timeStr.split(':')[0]);
+            return (hour + 1).toString().padStart(2, '0') + ':00';
+        }
+
+        // Auto-select today's tab in week view
+        const today = new Date().toISOString().split('T')[0];
+        const todayTab = document.getElementById(`day-${today}-tab`);
+        if (todayTab) {
+            const tabInstance = new bootstrap.Tab(todayTab);
+            tabInstance.show();
+        }
+
+        // Study Schedule functionality
+        // Build Schedule
+        document.getElementById('buildScheduleBtn').addEventListener('click', function() {
+            const form = document.getElementById('buildScheduleForm');
+            const formData = new FormData(form);
+            const data = {
+                start_date: formData.get('start_date'),
+                days_ahead: parseInt(formData.get('days_ahead'))
+            };
+
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Création...';
+
+            fetch('/api/study_schedule/build', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal and reload page
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('buildScheduleModal'));
+                    modal.hide();
+                    window.location.reload();
+                } else {
+                    alert('Erreur: ' + data.message);
+                    // Reset button
+                    this.disabled = false;
+                    this.innerHTML = '<i class="fas fa-magic me-1"></i>Créer';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Une erreur est survenue lors de la création du planning');
+                // Reset button
+                this.disabled = false;
+                this.innerHTML = '<i class="fas fa-magic me-1"></i>Créer';
+            });
+        });
+
+        // Add Study Block
+        document.getElementById('addStudyBlockBtn').addEventListener('click', function() {
+            const form = document.getElementById('addStudyBlockForm');
+            const formData = new FormData(form);
+            const data = {
+                day_of_week: parseInt(formData.get('day_of_week')),
+                start_time: formData.get('start_time'),
+                end_time: formData.get('end_time')
+            };
+
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Ajout...';
+
+            fetch('/api/study_blocks', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal and reload page
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addStudyBlockModal'));
+                    modal.hide();
+                    window.location.reload();
+                } else {
+                    alert('Erreur: ' + data.message);
+                    // Reset button
+                    this.disabled = false;
+                    this.innerHTML = 'Ajouter';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Une erreur est survenue lors de l\'ajout du bloc d\'étude');
+                // Reset button
+                this.disabled = false;
+                this.innerHTML = 'Ajouter';
+            });
+        });
+
+        // Delete Study Block
+        document.querySelectorAll('.delete-block-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const blockId = this.getAttribute('data-block-id');
+                if (confirm('Êtes-vous sûr de vouloir supprimer ce bloc d\'étude ?')) {
+                    // Show loading state
+                    this.disabled = true;
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+                    fetch(`/api/study_blocks/${blockId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            alert('Erreur: ' + data.message);
+                            // Reset button
+                            this.disabled = false;
+                            this.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Une erreur est survenue lors de la suppression du bloc d\'étude');
+                        // Reset button
+                        this.disabled = false;
+                        this.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                    });
+                }
+            });
+        });
+
+        // Delete Study Session
+        document.querySelectorAll('.delete-session-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const sessionId = this.getAttribute('data-session-id');
+                if (confirm('Êtes-vous sûr de vouloir supprimer cette session d\'étude ?')) {
+                    // Show loading state
+                    this.disabled = true;
+                    this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+
+                    fetch(`/api/study_sessions/${sessionId}`, {
+                        method: 'DELETE'
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.reload();
+                        } else {
+                            alert('Erreur: ' + data.message);
+                            // Reset button
+                            this.disabled = false;
+                            this.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Une erreur est survenue lors de la suppression de la session d\'étude');
+                        // Reset button
+                        this.disabled = false;
+                        this.innerHTML = '<i class="fas fa-trash-alt"></i>';
+                    });
+                }
+            });
+        });
+
+        // Add Subject in Preferences
+        document.getElementById('addSubjectBtn').addEventListener('click', function() {
+            const subjectPriorities = document.getElementById('subjectPriorities');
+            const newSubject = document.createElement('div');
+            newSubject.className = 'mb-3 row align-items-center';
+            newSubject.innerHTML = `
+                <div class="col-md-6">
+                    <input type="text" class="form-control" name="subject_names[]" placeholder="Nom de la matière">
+                </div>
+                <div class="col-md-6">
+                    <select class="form-select" name="subject_priorities[]">
+                        <option value="high">Haute</option>
+                        <option value="medium" selected>Moyenne</option>
+                        <option value="low">Basse</option>
+                    </select>
+                </div>
+            `;
+            subjectPriorities.appendChild(newSubject);
+        });
+
+        // Save Preferences
+        document.getElementById('savePreferencesBtn').addEventListener('click', function() {
+            const form = document.getElementById('studyPreferencesForm');
+            const formData = new FormData(form);
+            
+            // Get subject names and priorities
+            const subjectNames = Array.from(formData.getAll('subject_names[]'));
+            const subjectPriorities = Array.from(formData.getAll('subject_priorities[]'));
+            
+            // Create subjects array
+            const subjects = [];
+            for (let i = 0; i < subjectNames.length; i++) {
+                if (subjectNames[i].trim() !== '') {
+                    subjects.push({
+                        name: subjectNames[i],
+                        priority: subjectPriorities[i]
+                    });
+                }
+            }
+            
+            const data = {
+                max_session_duration: parseInt(formData.get('max_session_duration')),
+                break_duration: parseInt(formData.get('break_duration')),
+                subjects: subjects
+            };
+
+            // Show loading state
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Enregistrement...';
+
+            fetch('/api/calendar/preferences', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal and reload page
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('studyPreferencesModal'));
+                    modal.hide();
+                    window.location.reload();
+                } else {
+                    alert('Erreur: ' + data.message);
+                    // Reset button
+                    this.disabled = false;
+                    this.innerHTML = 'Enregistrer';
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Une erreur est survenue lors de l\'enregistrement des préférences');
+                // Reset button
+                this.disabled = false;
+                this.innerHTML = 'Enregistrer';
+            });
+        });
+    });
+</script>
+{% endblock %}

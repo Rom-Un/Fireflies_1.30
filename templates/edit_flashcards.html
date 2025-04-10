@@ -1,0 +1,873 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Flashcards - Fireflies{% endblock %}
+
+{% block content %}
+<div class="container fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">{{ _('Edit Flashcard Set') }}</h1>
+        <a href="{{ url_for('flashcards') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>{{ _('Back to Flashcards') }}
+        </a>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Set Details') }}</h5>
+                </div>
+                <div class="card-body">
+                    <form id="edit-set-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="set-name" class="form-label">{{ _('Set Name') }}</label>
+                                <input type="text" class="form-control" id="set-name" value="{{ flashcard_set.name }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="set-subject" class="form-label">{{ _('Subject') }}</label>
+                                <div class="input-group">
+                                    <select class="form-select" id="set-subject-select" onchange="updateSubject()">
+                                        <option value="" disabled {% if not flashcard_set.subject %}selected{% endif %}>{{ _('Select a subject or enter your own') }}</option>
+                                        <option value="Mathematics" {% if flashcard_set.subject == 'Mathematics' %}selected{% endif %}>Mathematics</option>
+                                        <option value="Science" {% if flashcard_set.subject == 'Science' %}selected{% endif %}>Science</option>
+                                        <option value="History" {% if flashcard_set.subject == 'History' %}selected{% endif %}>History</option>
+                                        <option value="Languages" {% if flashcard_set.subject == 'Languages' %}selected{% endif %}>Languages</option>
+                                        <option value="Computer Science" {% if flashcard_set.subject == 'Computer Science' %}selected{% endif %}>Computer Science</option>
+                                        <option value="Other" {% if flashcard_set.subject == 'Other' %}selected{% endif %}>Other</option>
+                                        {% if subjects %}
+                                            {% for subject in subjects %}
+                                                {% if subject not in ['Mathematics', 'Science', 'History', 'Languages', 'Computer Science', 'Other'] %}
+                                                <option value="{{ subject }}" {% if subject == flashcard_set.subject %}selected{% endif %}>{{ subject }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                        <option value="custom" {% if flashcard_set.subject and flashcard_set.subject not in ['Mathematics', 'Science', 'History', 'Languages', 'Computer Science', 'Other'] and flashcard_set.subject not in subjects %}selected{% endif %}>{{ _('Custom...') }}</option>
+                                    </select>
+                                    <input type="text" class="form-control" id="set-subject-custom" placeholder="{{ _('Enter subject') }}" 
+                                           value="{% if flashcard_set.subject and flashcard_set.subject not in ['Mathematics', 'Science', 'History', 'Languages', 'Computer Science', 'Other'] and flashcard_set.subject not in subjects %}{{ flashcard_set.subject }}{% endif %}"
+                                           style="display: {% if flashcard_set.subject and flashcard_set.subject not in ['Mathematics', 'Science', 'History', 'Languages', 'Computer Science', 'Other'] and flashcard_set.subject not in subjects %}block{% else %}none{% endif %};">
+                                    <input type="hidden" id="set-subject" name="subject" value="{{ flashcard_set.subject }}" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="set-description" class="form-label">{{ _('Description') }}</label>
+                            <textarea class="form-control" id="set-description" rows="2">{{ flashcard_set.description }}</textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>{{ _('Save Set Details') }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ _('Flashcards') }}</h5>
+                    <button class="btn btn-success" id="add-card-btn">
+                        <i class="fas fa-plus-circle me-2"></i>{{ _('Add Card') }}
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="cards-container">
+                        {% if flashcard_set.cards %}
+                            {% for card in flashcard_set.cards %}
+                            <div class="card mb-3 flashcard-item" data-card-index="{{ loop.index0 }}">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <div class="mb-3">
+                                                <label class="form-label">{{ _('Question') }}</label>
+                                                <textarea class="form-control card-question" rows="2">{{ card.question }}</textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">{{ _('Image URL') }} <small class="text-muted">({{ _('Optional') }})</small></label>
+                                                <input type="text" class="form-control card-image-url" value="{{ card.image_url or '' }}">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">{{ _('Tags') }} <small class="text-muted">({{ _('Comma separated') }})</small></label>
+                                                <input type="text" class="form-control card-tags" value="{{ card.tags|join(', ') if card.tags else '' }}">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <div class="mb-3">
+                                                <label class="form-label">{{ _('Answer') }}</label>
+                                                <textarea class="form-control card-answer" rows="2">{{ card.answer }}</textarea>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">{{ _('Audio URL') }} <small class="text-muted">({{ _('Optional') }})</small></label>
+                                                <input type="text" class="form-control card-audio-url" value="{{ card.audio_url or '' }}">
+                                            </div>
+                                            <div class="mb-3">
+                                                <div class="form-check">
+                                                    <input class="form-check-input card-reset-learning" type="checkbox" id="reset-learning-{{ loop.index0 }}">
+                                                    <label class="form-check-label" for="reset-learning-{{ loop.index0 }}">
+                                                        {{ _('Reset learning progress') }}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2 d-flex align-items-center">
+                                            <div class="btn-group-vertical">
+                                                <button class="btn btn-danger btn-sm delete-card-btn mb-2">
+                                                    <i class="fas fa-trash"></i> {{ _('Delete') }}
+                                                </button>
+                                                <button class="btn btn-info btn-sm preview-card-btn">
+                                                    <i class="fas fa-eye"></i> {{ _('Preview') }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-4">
+                                <i class="fas fa-info-circle fa-2x mb-3 text-muted"></i>
+                                <h5>{{ _('No cards yet') }}</h5>
+                                <p class="text-muted">{{ _('Click "Add Card" to create your first flashcard.') }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <span>{{ _('Total Cards') }}: <span id="card-count">{{ flashcard_set.cards|length }}</span></span>
+                        <button class="btn btn-primary" id="save-cards-btn">
+                            <i class="fas fa-save me-2"></i>{{ _('Save All Cards') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Tips for Creating Good Flashcards') }}</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            {{ _('Keep questions clear and concise') }}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            {{ _('Focus on one concept per card') }}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            {{ _('Use your own words to improve understanding') }}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            {{ _('Include images or diagrams when helpful') }}
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-check-circle text-success me-2"></i>
+                            {{ _('Create cards that test your understanding, not just memorization') }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Card Template (hidden) -->
+<template id="card-template">
+    <div class="card mb-3 flashcard-item" data-card-index="">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="mb-3">
+                        <label class="form-label">{{ _('Question') }}</label>
+                        <textarea class="form-control card-question" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ _('Image URL') }} <small class="text-muted">({{ _('Optional') }})</small></label>
+                        <input type="text" class="form-control card-image-url">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ _('Tags') }} <small class="text-muted">({{ _('Comma separated') }})</small></label>
+                        <input type="text" class="form-control card-tags">
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="mb-3">
+                        <label class="form-label">{{ _('Answer') }}</label>
+                        <textarea class="form-control card-answer" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">{{ _('Audio URL') }} <small class="text-muted">({{ _('Optional') }})</small></label>
+                        <input type="text" class="form-control card-audio-url">
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input card-reset-learning" type="checkbox">
+                            <label class="form-check-label">
+                                {{ _('Reset learning progress') }}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2 d-flex align-items-center">
+                    <div class="btn-group-vertical">
+                        <button class="btn btn-danger btn-sm delete-card-btn mb-2">
+                            <i class="fas fa-trash"></i> {{ _('Delete') }}
+                        </button>
+                        <button class="btn btn-info btn-sm preview-card-btn">
+                            <i class="fas fa-eye"></i> {{ _('Preview') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+// Function to update the subject field based on selection
+function updateSubject() {
+    const selectElement = document.getElementById('set-subject-select');
+    const customInput = document.getElementById('set-subject-custom');
+    const hiddenInput = document.getElementById('set-subject');
+    
+    if (selectElement.value === 'custom') {
+        // Show custom input field
+        customInput.style.display = 'block';
+        customInput.focus();
+        hiddenInput.value = customInput.value;
+    } else {
+        // Hide custom input field and use selected value
+        customInput.style.display = 'none';
+        hiddenInput.value = selectElement.value;
+    }
+}
+
+// Update hidden input when custom field changes
+document.addEventListener('DOMContentLoaded', function() {
+    const customInput = document.getElementById('set-subject-custom');
+    if (customInput) {
+        customInput.addEventListener('input', function() {
+            document.getElementById('set-subject').value = this.value;
+        });
+    }
+    
+    // Initial call to set the correct value
+    updateSubject();
+    
+    const setId = '{{ flashcard_set.id }}';
+    const cardsContainer = document.getElementById('cards-container');
+    const cardTemplate = document.getElementById('card-template');
+    const cardCountElement = document.getElementById('card-count');
+    
+    // Add new card
+    document.getElementById('add-card-btn').addEventListener('click', function() {
+        // Clear any "no cards" message
+        if (document.querySelectorAll('.flashcard-item').length === 0) {
+            cardsContainer.innerHTML = '';
+        }
+        
+        // Clone the template
+        const newCard = document.importNode(cardTemplate.content, true).querySelector('.flashcard-item');
+        
+        // Set the card index
+        const cardIndex = document.querySelectorAll('.flashcard-item').length;
+        newCard.setAttribute('data-card-index', cardIndex);
+        
+        // Add delete event listener
+        newCard.querySelector('.delete-card-btn').addEventListener('click', function() {
+            newCard.remove();
+            updateCardCount();
+            reindexCards();
+        });
+        
+        // Add to container
+        cardsContainer.appendChild(newCard);
+        
+        // Update card count
+        updateCardCount();
+        
+        // Focus on the new question field
+        newCard.querySelector('.card-question').focus();
+    });
+    
+    // Delete card
+    document.querySelectorAll('.delete-card-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            this.closest('.flashcard-item').remove();
+            updateCardCount();
+            reindexCards();
+        });
+    });
+    
+    // Update card count
+    function updateCardCount() {
+        const count = document.querySelectorAll('.flashcard-item').length;
+        cardCountElement.textContent = count;
+        
+        // Show "no cards" message if needed
+        if (count === 0) {
+            cardsContainer.innerHTML = `
+                <div class="text-center py-4">
+                    <i class="fas fa-info-circle fa-2x mb-3 text-muted"></i>
+                    <h5>{{ _('No cards yet') }}</h5>
+                    <p class="text-muted">{{ _('Click "Add Card" to create your first flashcard.') }}</p>
+                </div>
+            `;
+        }
+    }
+    
+    // Reindex cards
+    function reindexCards() {
+        document.querySelectorAll('.flashcard-item').forEach((card, index) => {
+            card.setAttribute('data-card-index', index);
+        });
+    }
+    
+    // Save set details
+    document.getElementById('edit-set-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('set-name').value;
+        const subject = document.getElementById('set-subject').value;
+        const description = document.getElementById('set-description').value;
+        
+        // Validate inputs
+        if (!name.trim()) {
+            alert("{{ _('Please enter a set name') }}");
+            return;
+        }
+        
+        if (!subject.trim()) {
+            // If custom is selected but no text is entered
+            if (document.getElementById('set-subject-select').value === 'custom') {
+                alert("{{ _('Please enter a custom subject') }}");
+                document.getElementById('set-subject-custom').focus();
+            } else {
+                alert("{{ _('Please select a subject') }}");
+                document.getElementById('set-subject-select').focus();
+            }
+            return;
+        }
+        
+        // Show loading indicator
+        const saveBtn = document.querySelector('#edit-set-form button[type="submit"]');
+        const originalBtnText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Saving...") }}';
+        saveBtn.disabled = true;
+        
+        // Determine if we're creating a new set or updating an existing one
+        const isNewSet = setId === 'new';
+        const url = isNewSet ? '/api/flashcards' : `/api/flashcards/${setId}`;
+        const method = isNewSet ? 'POST' : 'PUT';
+        
+        fetch(url, {
+            method: method,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                subject: subject,
+                description: description
+            }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Restore button
+            saveBtn.innerHTML = originalBtnText;
+            saveBtn.disabled = false;
+            
+            if (data.success) {
+                if (isNewSet && data.data && data.data.id) {
+                    // If we created a new set, redirect to the edit page for the new set
+                    alert('{{ _("Set created successfully!") }}');
+                    window.location.href = `/edit_flashcards/${data.data.id}`;
+                } else {
+                    alert('{{ _("Set details saved successfully!") }}');
+                }
+            } else {
+                alert('{{ _("Error") }}: ' + data.message);
+            }
+        })
+        .catch(error => {
+            // Restore button
+            saveBtn.innerHTML = originalBtnText;
+            saveBtn.disabled = false;
+            
+            console.error('Error:', error);
+            alert('{{ _("An error occurred while saving the set details.") }}');
+        });
+    });
+    
+    // Preview card
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('preview-card-btn') || e.target.closest('.preview-card-btn')) {
+            const cardElement = e.target.closest('.flashcard-item');
+            const question = cardElement.querySelector('.card-question').value;
+            const answer = cardElement.querySelector('.card-answer').value;
+            const imageUrl = cardElement.querySelector('.card-image-url').value;
+            const audioUrl = cardElement.querySelector('.card-audio-url').value;
+            
+            // Create a preview modal
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.id = 'previewModal';
+            modal.setAttribute('tabindex', '-1');
+            modal.setAttribute('aria-labelledby', 'previewModalLabel');
+            modal.setAttribute('aria-hidden', 'true');
+            
+            modal.innerHTML = `
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="previewModalLabel">{{ _('Card Preview') }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="card mb-3">
+                                <div class="card-header">{{ _('Question') }}</div>
+                                <div class="card-body">
+                                    ${imageUrl ? `<img src="${imageUrl}" class="img-fluid rounded mb-3" style="max-height: 200px;">` : ''}
+                                    <h5>${question}</h5>
+                                </div>
+                            </div>
+                            <div class="card">
+                                <div class="card-header">{{ _('Answer') }}</div>
+                                <div class="card-body">
+                                    <h5>${answer}</h5>
+                                    ${audioUrl ? `<audio controls src="${audioUrl}" class="mt-3"></audio>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Close') }}</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Show the modal
+            const modalInstance = new bootstrap.Modal(modal);
+            modalInstance.show();
+            
+            // Remove the modal from DOM when hidden
+            modal.addEventListener('hidden.bs.modal', function() {
+                document.body.removeChild(modal);
+            });
+        }
+    });
+    
+    // Save all cards
+    document.getElementById('save-cards-btn').addEventListener('click', function() {
+        // Check if we're editing a new set
+        if (setId === 'new') {
+            alert("{{ _('Please save the set details first before adding cards.') }}");
+            return;
+        }
+        
+        const cards = [];
+        
+        document.querySelectorAll('.flashcard-item').forEach(cardElement => {
+            const question = cardElement.querySelector('.card-question').value;
+            const answer = cardElement.querySelector('.card-answer').value;
+            const imageUrl = cardElement.querySelector('.card-image-url').value;
+            const audioUrl = cardElement.querySelector('.card-audio-url').value;
+            const tagsInput = cardElement.querySelector('.card-tags').value;
+            const resetLearning = cardElement.querySelector('.card-reset-learning').checked;
+            
+            // Parse tags
+            const tags = tagsInput.split(',')
+                .map(tag => tag.trim())
+                .filter(tag => tag.length > 0);
+            
+            if (question.trim() && answer.trim()) {
+                const cardData = {
+                    question: question,
+                    answer: answer,
+                    image_url: imageUrl.trim() || null,
+                    audio_url: audioUrl.trim() || null,
+                    tags: tags,
+                    reset_learning: resetLearning
+                };
+                
+                // If the card has an ID, include it
+                const cardId = cardElement.getAttribute('data-card-id');
+                if (cardId) {
+                    cardData.id = cardId;
+                }
+                
+                cards.push(cardData);
+            }
+        });
+        
+        // Check if there are any cards to save
+        if (cards.length === 0) {
+            alert("{{ _('Please add at least one card with question and answer.') }}");
+            return;
+        }
+        
+        // Show loading indicator
+        const saveBtn = document.getElementById('save-cards-btn');
+        const originalBtnText = saveBtn.innerHTML;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Saving...") }}';
+        saveBtn.disabled = true;
+        
+        fetch(`/api/flashcards/${setId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                cards: cards
+            }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            // Restore button
+            saveBtn.innerHTML = originalBtnText;
+            saveBtn.disabled = false;
+            
+            if (data.success) {
+                alert('{{ _("Cards saved successfully!") }}');
+                // Reload the page to show updated data
+                window.location.reload();
+            } else {
+                alert('{{ _("Error") }}: ' + data.message);
+            }
+        })
+        .catch(error => {
+            // Restore button
+            saveBtn.innerHTML = originalBtnText;
+            saveBtn.disabled = false;
+            
+            console.error('Error:', error);
+            alert('{{ _("An error occurred while saving the cards.") }}');
+        });
+    });
+    
+    // Add import/export buttons to the card footer
+    const cardFooter = document.querySelector('.card-footer');
+    const importExportButtons = document.createElement('div');
+    importExportButtons.className = 'mt-3';
+    importExportButtons.innerHTML = `
+        <button class="btn btn-outline-primary me-2" id="import-cards-btn">
+            <i class="fas fa-file-import me-2"></i>{{ _('Import Cards') }}
+        </button>
+        <button class="btn btn-outline-secondary" id="export-cards-btn">
+            <i class="fas fa-file-export me-2"></i>{{ _('Export Cards') }}
+        </button>
+    `;
+    cardFooter.appendChild(importExportButtons);
+    
+    // Import cards
+    document.getElementById('import-cards-btn').addEventListener('click', function() {
+        // Create a modal for importing
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'importModal';
+        modal.setAttribute('tabindex', '-1');
+        modal.setAttribute('aria-labelledby', 'importModalLabel');
+        modal.setAttribute('aria-hidden', 'true');
+        
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="importModalLabel">{{ _('Import Cards') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="import-format" class="form-label">{{ _('Format') }}</label>
+                            <select class="form-select" id="import-format">
+                                <option value="json">JSON</option>
+                                <option value="csv">CSV</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="import-data" class="form-label">{{ _('Paste your data here') }}</label>
+                            <textarea class="form-control" id="import-data" rows="10"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Cancel') }}</button>
+                        <button type="button" class="btn btn-primary" id="confirm-import-btn">{{ _('Import') }}</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Show the modal
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+        
+        // Handle import confirmation
+        document.getElementById('confirm-import-btn').addEventListener('click', function() {
+            const format = document.getElementById('import-format').value;
+            const data = document.getElementById('import-data').value;
+            
+            if (!data.trim()) {
+                alert('{{ _("Please enter data to import") }}');
+                return;
+            }
+            
+            let cardsToImport = [];
+            
+            try {
+                if (format === 'json') {
+                    // Parse JSON
+                    const jsonData = JSON.parse(data);
+                    
+                    if (Array.isArray(jsonData)) {
+                        // Array of cards
+                        cardsToImport = jsonData;
+                    } else if (jsonData.cards && Array.isArray(jsonData.cards)) {
+                        // Object with cards array
+                        cardsToImport = jsonData.cards;
+                    } else {
+                        throw new Error('Invalid JSON format');
+                    }
+                } else if (format === 'csv') {
+                    // Parse CSV
+                    const lines = data.split('\n').map(line => line.trim()).filter(line => line);
+                    
+                    // Check if there's a header row
+                    let startIndex = 0;
+                    if (lines[0].toLowerCase().includes('question') && lines[0].toLowerCase().includes('answer')) {
+                        startIndex = 1;
+                    }
+                    
+                    for (let i = startIndex; i < lines.length; i++) {
+                        const line = lines[i];
+                        
+                        // Handle quoted CSV properly
+                        let parts = [];
+                        let inQuotes = false;
+                        let currentPart = '';
+                        
+                        for (let j = 0; j < line.length; j++) {
+                            const char = line[j];
+                            
+                            if (char === '"') {
+                                inQuotes = !inQuotes;
+                            } else if (char === ',' && !inQuotes) {
+                                parts.push(currentPart);
+                                currentPart = '';
+                            } else {
+                                currentPart += char;
+                            }
+                        }
+                        
+                        parts.push(currentPart);
+                        
+                        // Clean up parts
+                        parts = parts.map(part => {
+                            part = part.trim();
+                            if (part.startsWith('"') && part.endsWith('"')) {
+                                part = part.substring(1, part.length - 1);
+                            }
+                            return part.replace(/""/g, '"');
+                        });
+                        
+                        if (parts.length >= 2) {
+                            const card = {
+                                question: parts[0],
+                                answer: parts[1]
+                            };
+                            
+                            // Add tags if present
+                            if (parts.length >= 3 && parts[2]) {
+                                card.tags = parts[2].split(',').map(tag => tag.trim()).filter(tag => tag);
+                            }
+                            
+                            cardsToImport.push(card);
+                        }
+                    }
+                }
+                
+                // Validate cards
+                cardsToImport = cardsToImport.filter(card => 
+                    card && typeof card === 'object' && 
+                    card.question && typeof card.question === 'string' &&
+                    card.answer && typeof card.answer === 'string'
+                );
+                
+                if (cardsToImport.length === 0) {
+                    throw new Error('No valid cards found');
+                }
+                
+                // Import the cards
+                fetch(`/api/flashcards/${setId}/import`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        cards: cardsToImport
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`{{ _('Successfully imported') }} ${cardsToImport.length} {{ _('cards') }}!`);
+                        modalInstance.hide();
+                        // Reload the page to show the imported cards
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while importing the cards.');
+                });
+                
+            } catch (error) {
+                console.error('Error parsing import data:', error);
+                alert(`{{ _('Error parsing data') }}: ${error.message}`);
+            }
+        });
+        
+        // Remove the modal from DOM when hidden
+        modal.addEventListener('hidden.bs.modal', function() {
+            document.body.removeChild(modal);
+        });
+    });
+    
+    // Export cards
+    document.getElementById('export-cards-btn').addEventListener('click', function() {
+        // Create a modal for exporting
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'exportModal';
+        modal.setAttribute('tabindex', '-1');
+        modal.setAttribute('aria-labelledby', 'exportModalLabel');
+        modal.setAttribute('aria-hidden', 'true');
+        
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exportModalLabel">{{ _('Export Cards') }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="export-format" class="form-label">{{ _('Format') }}</label>
+                            <select class="form-select" id="export-format">
+                                <option value="json">JSON</option>
+                                <option value="csv">CSV</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="export-data" class="form-label">{{ _('Exported Data') }}</label>
+                            <textarea class="form-control" id="export-data" rows="10" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ _('Close') }}</button>
+                        <button type="button" class="btn btn-primary" id="copy-export-btn">
+                            <i class="fas fa-copy me-2"></i>{{ _('Copy to Clipboard') }}
+                        </button>
+                        <button type="button" class="btn btn-success" id="download-export-btn">
+                            <i class="fas fa-download me-2"></i>{{ _('Download') }}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        // Show the modal
+        const modalInstance = new bootstrap.Modal(modal);
+        modalInstance.show();
+        
+        // Get the export format select and data textarea
+        const exportFormat = document.getElementById('export-format');
+        const exportData = document.getElementById('export-data');
+        
+        // Function to update the exported data
+        function updateExportData() {
+            const format = exportFormat.value;
+            
+            fetch(`/api/flashcards/${setId}/export?format=${format}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.text())
+            .then(data => {
+                exportData.value = data;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                exportData.value = `Error: ${error.message}`;
+            });
+        }
+        
+        // Update data when format changes
+        exportFormat.addEventListener('change', updateExportData);
+        
+        // Initial update
+        updateExportData();
+        
+        // Copy to clipboard
+        document.getElementById('copy-export-btn').addEventListener('click', function() {
+            exportData.select();
+            document.execCommand('copy');
+            alert('{{ _("Copied to clipboard!") }}');
+        });
+        
+        // Download
+        document.getElementById('download-export-btn').addEventListener('click', function() {
+            const format = exportFormat.value;
+            const data = exportData.value;
+            const filename = `flashcards_${setId}.${format}`;
+            
+            const blob = new Blob([data], { type: format === 'json' ? 'application/json' : 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+        
+        // Remove the modal from DOM when hidden
+        modal.addEventListener('hidden.bs.modal', function() {
+            document.body.removeChild(modal);
+        });
+    });
+});
+</script>
+{% endblock %}

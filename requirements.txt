@@ -1,0 +1,9 @@
+pronotepy
+pycryptodome
+beautifulsoup4
+requests
+flask
+icalendar
+pytz
+uuid
+python-dateutil

@@ -1,0 +1,13 @@
+{
+  "study_blocks": [],
+  "scheduled_sessions": [],
+  "external_calendars": [],
+  "homework_priorities": [],
+  "preferences": {
+    "preferred_study_times": [],
+    "study_session_length": 45,
+    "break_length": 15,
+    "max_daily_study_time": 180,
+    "calendar_sync_enabled": false
+  }
+}

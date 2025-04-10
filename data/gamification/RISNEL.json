@@ -1,0 +1,380 @@
+{
+  "points": 687,
+  "level": 5,
+  "streak": {
+    "current": 4,
+    "max": 4,
+    "last_login": "2025-04-09",
+    "flame_level": 1,
+    "multiplier": 1.1
+  },
+  "achievements": [
+    {
+      "id": "hw_5",
+      "name": "Homework Starter",
+      "description": "Complete 5 homework assignments",
+      "threshold": 5,
+      "points": 25,
+      "date_earned": "2025-04-04T16:30:17.174607"
+    },
+    {
+      "id": "hw_20",
+      "name": "Homework Hero",
+      "description": "Complete 20 homework assignments",
+      "threshold": 20,
+      "points": 75,
+      "date_earned": "2025-04-04T16:30:26.988937"
+    },
+    {
+      "id": "streak_3",
+      "name": "S\u00e9rie de 3 jours",
+      "description": "Connexion pendant 3 jours cons\u00e9cutifs",
+      "threshold": 3,
+      "points": 20,
+      "category": "streak",
+      "date_earned": "2025-04-08T12:05:36.455653"
+    }
+  ],
+  "completed_homework": 23,
+  "viewed_grades": 3,
+  "checked_timetable": 4,
+  "sent_messages": 3,
+  "last_points_update": {
+    "viewed_grades": "2025-04-08",
+    "checked_timetable": "2025-04-09"
+  },
+  "activity_history": [
+    {
+      "date": "2025-04-04T16:28:49.678661",
+      "action": "First login",
+      "points": 10
+    },
+    {
+      "date": "2025-04-04T16:29:44.775257",
+      "action": "Completed homework (1 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:29:45.577225",
+      "action": "Completed homework (2 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:02.917236",
+      "action": "Completed homework (3 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:14.389492",
+      "action": "Completed homework (4 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:17.173853",
+      "action": "Completed homework (5 total)",
+      "points": 25
+    },
+    {
+      "date": "2025-04-04T16:30:17.174617",
+      "action": "Achievement: Homework Starter",
+      "points": 25
+    },
+    {
+      "date": "2025-04-04T16:30:17.174622",
+      "action": "Level up! 1 \u2192 2",
+      "points": 0
+    },
+    {
+      "date": "2025-04-04T16:30:17.946271",
+      "action": "Completed homework (6 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:18.557158",
+      "action": "Completed homework (7 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:19.147716",
+      "action": "Completed homework (8 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:20.028592",
+      "action": "Completed homework (9 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:20.570096",
+      "action": "Completed homework (10 total)",
+      "points": 35
+    },
+    {
+      "date": "2025-04-04T16:30:20.570104",
+      "action": "Level up! 2 \u2192 3",
+      "points": 0
+    },
+    {
+      "date": "2025-04-04T16:30:21.211405",
+      "action": "Completed homework (11 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:22.184879",
+      "action": "Completed homework (12 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:23.062374",
+      "action": "Completed homework (13 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:23.843066",
+      "action": "Completed homework (14 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:24.580743",
+      "action": "Completed homework (15 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:25.153914",
+      "action": "Completed homework (16 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:25.153921",
+      "action": "Level up! 3 \u2192 4",
+      "points": 0
+    },
+    {
+      "date": "2025-04-04T16:30:25.721216",
+      "action": "Completed homework (17 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:26.120587",
+      "action": "Completed homework (18 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:26.545823",
+      "action": "Completed homework (19 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:26.988117",
+      "action": "Completed homework (20 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:26.988946",
+      "action": "Achievement: Homework Hero",
+      "points": 75
+    },
+    {
+      "date": "2025-04-04T16:30:26.988951",
+      "action": "Level up! 4 \u2192 5",
+      "points": 0
+    },
+    {
+      "date": "2025-04-04T16:30:28.073681",
+      "action": "Completed homework (21 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:29.034473",
+      "action": "Completed homework (22 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T16:30:29.965212",
+      "action": "Completed homework (23 total)",
+      "points": 15
+    },
+    {
+      "date": "2025-04-04T19:25:09.947652",
+      "action": "Plan d'\u00e9tude cr\u00e9\u00e9 pour Maths",
+      "points": 10,
+      "xp": 50
+    },
+    {
+      "date": "2025-04-04T19:25:14.061376",
+      "action": "Exercice compl\u00e9t\u00e9 pour Maths",
+      "points": 15,
+      "xp": 75
+    },
+    {
+      "date": "2025-04-06T19:18:39.468250",
+      "action": "Connexion apr\u00e8s une pause",
+      "points": 5,
+      "xp": 25
+    },
+    {
+      "date": "2025-04-06T19:22:02.593200",
+      "action": "Consultation des notes",
+      "points": 5,
+      "xp": 25
+    },
+    {
+      "date": "2025-04-06T19:22:05.588502",
+      "action": "Consultation de l'emploi du temps",
+      "points": 5,
+      "xp": 25
+    },
+    {
+      "date": "2025-04-06T19:35:53.029814",
+      "action": "Exercice compl\u00e9t\u00e9 pour Maths",
+      "points": 15,
+      "xp": 75
+    },
+    {
+      "date": "2025-04-06T20:11:06.653650",
+      "action": "Message envoy\u00e9 (1 au total)",
+      "points": 10,
+      "xp": 50
+    },
+    {
+      "date": "2025-04-06T20:14:39.213480",
+      "action": "Message envoy\u00e9 (2 au total)",
+      "points": 10,
+      "xp": 50
+    },
+    {
+      "date": "2025-04-06T20:15:22.354507",
+      "action": "Message envoy\u00e9 (3 au total)",
+      "points": 10,
+      "xp": 50
+    },
+    {
+      "date": "2025-04-07T09:51:04.265781",
+      "action": "S\u00e9rie de connexion: 2 jours",
+      "points": 9,
+      "xp": 45
+    },
+    {
+      "date": "2025-04-07T10:01:57.506714",
+      "action": "Consultation des notes",
+      "points": 5,
+      "xp": 25
+    },
+    {
+      "date": "2025-04-07T10:06:44.266628",
+      "action": "Consultation de l'emploi du temps",
+      "points": 5,
+      "xp": 25
+    },
+    {
+      "date": "2025-04-07T10:16:15.240818",
+      "action": "Exercice compl\u00e9t\u00e9 pour Maths",
+      "points": 15,
+      "xp": 75
+    },
+    {
+      "date": "2025-04-07T18:01:55.969737",
+      "action": "Quiz de flashcards termin\u00e9 (1 au total)",
+      "points": 20,
+      "xp": 100
+    },
+    {
+      "date": "2025-04-08T12:05:36.440112",
+      "action": "S\u00e9rie de connexion: 3 jours",
+      "points": 12,
+      "xp": 60
+    },
+    {
+      "date": "2025-04-08T12:05:36.455668",
+      "action": "Succ\u00e8s : S\u00e9rie de 3 jours",
+      "points": 22,
+      "xp": 110
+    },
+    {
+      "date": "2025-04-08T12:06:11.303260",
+      "action": "Consultation de l'emploi du temps",
+      "points": 5,
+      "xp": 25
+    },
+    {
+      "date": "2025-04-08T12:15:05.001547",
+      "action": "Consultation des notes",
+      "points": 5,
+      "xp": 25
+    },
+    {
+      "date": "2025-04-09T16:58:56.189835",
+      "action": "S\u00e9rie de connexion: 4 jours",
+      "points": 14,
+      "xp": 70
+    },
+    {
+      "date": "2025-04-09T17:23:11.930331",
+      "action": "Consultation de l'emploi du temps",
+      "points": 5,
+      "xp": 25
+    }
+  ],
+  "study_plans": [],
+  "xp": 1010,
+  "next_level_xp": 1118,
+  "quests": {
+    "daily": [
+      {
+        "id": "login",
+        "name": "Connexion Quotidienne",
+        "description": "Connectez-vous aujourd'hui",
+        "xp": 20,
+        "completed": true
+      },
+      {
+        "id": "send_message",
+        "name": "Envoyer un Message",
+        "description": "Envoyez un message \u00e0 un enseignant ou camarade",
+        "xp": 40,
+        "completed": false
+      },
+      {
+        "id": "complete_homework",
+        "name": "Terminer un Devoir",
+        "description": "Marquez un devoir comme termin\u00e9",
+        "xp": 50,
+        "completed": false
+      }
+    ],
+    "weekly": [
+      {
+        "id": "complete_5_homework",
+        "name": "5 Devoirs",
+        "description": "Terminez 5 devoirs cette semaine",
+        "target": 5,
+        "progress": 0,
+        "xp": 150,
+        "completed": false
+      },
+      {
+        "id": "check_grades_3",
+        "name": "V\u00e9rifier les Notes 3 Fois",
+        "description": "Consultez vos notes 3 jours diff\u00e9rents",
+        "target": 3,
+        "progress": 0,
+        "xp": 80,
+        "completed": false
+      },
+      {
+        "id": "send_3_messages",
+        "name": "Envoyer 3 Messages",
+        "description": "Envoyez 3 messages cette semaine",
+        "target": 3,
+        "progress": 0,
+        "xp": 120,
+        "completed": false
+      }
+    ],
+    "last_refresh": "2025-04-09"
+  },
+  "stats": {
+    "login_days": 3
+  },
+  "completed_flashcards": 1
+}

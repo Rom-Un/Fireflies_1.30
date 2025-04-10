@@ -1,0 +1,611 @@
+{% extends 'base.html' %}
+
+{% block title %}Flashcard Quiz - Fireflies{% endblock %}
+
+{% block content %}
+<div class="container fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="page-title">{{ flashcard_set.name }}</h1>
+        <a href="{{ url_for('flashcards') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>{{ _('Back to Flashcards') }}
+        </a>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-0">{{ _('Quiz Mode') }}</h5>
+                        <span class="badge bg-primary">{{ flashcard_set.subject }}</span>
+                    </div>
+                    <div>
+                        <div class="btn-group me-2" role="group">
+                            <button class="btn btn-sm btn-outline-primary active" id="mode-all">
+                                {{ _('All Cards') }}
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" id="mode-due">
+                                {{ _('Due Cards') }}
+                            </button>
+                        </div>
+                        <span class="me-3">{{ _('Card') }}: <span id="current-card">1</span>/<span id="total-cards">{{ flashcard_set.cards|length }}</span></span>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-sm btn-outline-primary" id="shuffle-btn">
+                                <i class="fas fa-random me-1"></i>{{ _('Shuffle') }}
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" id="restart-btn">
+                                <i class="fas fa-redo me-1"></i>{{ _('Restart') }}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if flashcard_set.cards %}
+                    <div id="flashcard-container" class="text-center py-5">
+                        <div id="flashcard" class="mx-auto position-relative" style="max-width: 600px; min-height: 300px;">
+                            <div id="card-front" class="card mb-0 w-100 h-100">
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center p-5">
+                                    <div id="card-tags" class="mb-3"></div>
+                                    <div id="card-image-container" class="mb-3 d-none">
+                                        <img id="card-image" class="img-fluid rounded mb-3" style="max-height: 200px;" alt="Card image">
+                                    </div>
+                                    <h3 id="question-text" class="mb-4"></h3>
+                                    <button id="show-answer-btn" class="btn btn-primary mt-3">
+                                        <i class="fas fa-eye me-2"></i>{{ _('Show Answer') }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="card-back" class="card mb-0 w-100 h-100 d-none">
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center p-5">
+                                    <h3 id="answer-text" class="mb-4"></h3>
+                                    <div id="card-audio-container" class="mb-3 d-none">
+                                        <audio id="card-audio" controls></audio>
+                                    </div>
+                                    <div class="mt-4">
+                                        <p>{{ _('How well did you know this?') }}</p>
+                                        <div class="btn-group" role="group">
+                                            <button class="btn btn-danger rating-btn" data-rating="1" data-quality="0">
+                                                <i class="fas fa-times me-1"></i>{{ _('Failed') }}
+                                            </button>
+                                            <button class="btn btn-warning rating-btn" data-rating="2" data-quality="3">
+                                                <i class="fas fa-question me-1"></i>{{ _('Hard') }}
+                                            </button>
+                                            <button class="btn btn-info rating-btn" data-rating="3" data-quality="4">
+                                                <i class="fas fa-check me-1"></i>{{ _('Good') }}
+                                            </button>
+                                            <button class="btn btn-success rating-btn" data-rating="4" data-quality="5">
+                                                <i class="fas fa-check-double me-1"></i>{{ _('Easy') }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3 text-muted" id="card-next-due"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="quiz-complete" class="text-center py-5 d-none">
+                        <i class="fas fa-trophy fa-4x text-warning mb-4"></i>
+                        <h2>{{ _('Quiz Complete!') }}</h2>
+                        <p class="lead">{{ _('You have completed this flashcard set.') }}</p>
+                        <div class="mt-4">
+                            <button id="restart-quiz-btn" class="btn btn-primary me-2">
+                                <i class="fas fa-redo me-2"></i>{{ _('Restart Quiz') }}
+                            </button>
+                            <a href="{{ url_for('flashcards') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-arrow-left me-2"></i>{{ _('Back to Flashcards') }}
+                            </a>
+                        </div>
+                        <div class="mt-4">
+                            <div class="card mx-auto" style="max-width: 500px;">
+                                <div class="card-body">
+                                    <h5>{{ _('Quiz Statistics') }}</h5>
+                                    <div class="row text-center mt-3">
+                                        <div class="col-3">
+                                            <div class="p-3 rounded bg-danger bg-opacity-10">
+                                                <h3 id="stat-failed">0</h3>
+                                                <small class="text-muted">{{ _('Failed') }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="p-3 rounded bg-warning bg-opacity-10">
+                                                <h3 id="stat-hard">0</h3>
+                                                <small class="text-muted">{{ _('Hard') }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="p-3 rounded bg-info bg-opacity-10">
+                                                <h3 id="stat-good">0</h3>
+                                                <small class="text-muted">{{ _('Good') }}</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-3">
+                                            <div class="p-3 rounded bg-success bg-opacity-10">
+                                                <h3 id="stat-easy">0</h3>
+                                                <small class="text-muted">{{ _('Easy') }}</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="no-due-cards" class="text-center py-5 d-none">
+                        <i class="fas fa-check-circle fa-4x mb-3 text-success"></i>
+                        <h4>{{ _('No cards due for review') }}</h4>
+                        <p class="text-muted">{{ _('You\'ve reviewed all the cards that were due. Come back later or switch to "All Cards" mode.') }}</p>
+                        <button id="switch-to-all-btn" class="btn btn-primary mt-3">
+                            <i class="fas fa-layer-group me-2"></i>{{ _('Switch to All Cards') }}
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-exclamation-circle fa-4x mb-3 text-warning"></i>
+                        <h4>{{ _('No cards in this set') }}</h4>
+                        <p class="text-muted">{{ _('This flashcard set is empty. Add some cards first.') }}</p>
+                        <a href="{{ url_for('edit_flashcards', set_id=flashcard_set.id) }}" class="btn btn-primary mt-3">
+                            <i class="fas fa-edit me-2"></i>{{ _('Edit Flashcard Set') }}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    <div class="progress">
+                        <div id="progress-bar" class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Spaced Repetition System') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-brain fa-2x text-primary"></i>
+                                </div>
+                                <div>
+                                    <h5>{{ _('How It Works') }}</h5>
+                                    <p class="text-muted">{{ _('Cards you find difficult will appear more frequently. Easy cards will be shown less often.') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-calendar-alt fa-2x text-success"></i>
+                                </div>
+                                <div>
+                                    <h5>{{ _('Optimal Timing') }}</h5>
+                                    <p class="text-muted">{{ _('The system schedules reviews at the optimal time to maximize long-term retention.') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-chart-line fa-2x text-info"></i>
+                                </div>
+                                <div>
+                                    <h5>{{ _('Track Progress') }}</h5>
+                                    <p class="text-muted">{{ _('Your performance is tracked to help you focus on what needs more practice.') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get flashcard data from the server
+    const flashcardSet = {{ flashcard_set|tojson }};
+    let cards = flashcardSet.cards || [];
+    let dueCards = [];
+    let currentCards = cards; // The current set of cards being used (all or due)
+    let currentCardIndex = 0;
+    let quizComplete = false;
+    let currentMode = 'all'; // 'all' or 'due'
+    
+    // Statistics
+    const stats = {
+        failed: 0,
+        hard: 0,
+        good: 0,
+        easy: 0
+    };
+    
+    // Elements
+    const questionText = document.getElementById('question-text');
+    const answerText = document.getElementById('answer-text');
+    const cardFront = document.getElementById('card-front');
+    const cardBack = document.getElementById('card-back');
+    const showAnswerBtn = document.getElementById('show-answer-btn');
+    const currentCardElement = document.getElementById('current-card');
+    const totalCardsElement = document.getElementById('total-cards');
+    const progressBar = document.getElementById('progress-bar');
+    const flashcardContainer = document.getElementById('flashcard-container');
+    const quizCompleteContainer = document.getElementById('quiz-complete');
+    const noDueCardsContainer = document.getElementById('no-due-cards');
+    const cardImageContainer = document.getElementById('card-image-container');
+    const cardImage = document.getElementById('card-image');
+    const cardAudioContainer = document.getElementById('card-audio-container');
+    const cardAudio = document.getElementById('card-audio');
+    const cardTags = document.getElementById('card-tags');
+    const cardNextDue = document.getElementById('card-next-due');
+    const modeAllBtn = document.getElementById('mode-all');
+    const modeDueBtn = document.getElementById('mode-due');
+    
+    // Filter due cards
+    function filterDueCards() {
+        const now = new Date();
+        dueCards = cards.filter(card => {
+            if (!card.learning_data || !card.learning_data.next_review) {
+                return true; // Cards without learning data are always due
+            }
+            
+            const nextReview = new Date(card.learning_data.next_review);
+            return nextReview <= now;
+        });
+        
+        return dueCards;
+    }
+    
+    // Initialize
+    function initialize() {
+        // Filter due cards
+        filterDueCards();
+        
+        if (currentMode === 'due') {
+            currentCards = dueCards;
+        } else {
+            currentCards = cards;
+        }
+        
+        // Update total cards count
+        totalCardsElement.textContent = currentCards.length;
+        
+        // Check if there are cards to show
+        if (currentCards.length > 0) {
+            flashcardContainer.classList.remove('d-none');
+            quizCompleteContainer.classList.add('d-none');
+            noDueCardsContainer.classList.add('d-none');
+            showCard(0);
+        } else if (currentMode === 'due') {
+            // No due cards
+            flashcardContainer.classList.add('d-none');
+            quizCompleteContainer.classList.add('d-none');
+            noDueCardsContainer.classList.remove('d-none');
+        } else {
+            // No cards at all
+            flashcardContainer.innerHTML = `
+                <div class="text-center py-5">
+                    <i class="fas fa-exclamation-circle fa-4x mb-3 text-warning"></i>
+                    <h4>{{ _('No cards in this set') }}</h4>
+                    <p class="text-muted">{{ _('This flashcard set is empty. Add some cards first.') }}</p>
+                    <a href="{{ url_for('edit_flashcards', set_id=flashcard_set.id) }}" class="btn btn-primary mt-3">
+                        <i class="fas fa-edit me-2"></i>{{ _('Edit Flashcard Set') }}
+                    </a>
+                </div>
+            `;
+        }
+    }
+    
+    // Initialize the quiz
+    initialize();
+    
+    // Mode buttons
+    modeAllBtn.addEventListener('click', function() {
+        if (currentMode !== 'all') {
+            currentMode = 'all';
+            modeAllBtn.classList.add('active');
+            modeDueBtn.classList.remove('active');
+            
+            // Reset statistics
+            resetStats();
+            
+            // Reset and initialize
+            currentCardIndex = 0;
+            initialize();
+        }
+    });
+    
+    modeDueBtn.addEventListener('click', function() {
+        if (currentMode !== 'due') {
+            currentMode = 'due';
+            modeDueBtn.classList.add('active');
+            modeAllBtn.classList.remove('active');
+            
+            // Reset statistics
+            resetStats();
+            
+            // Reset and initialize
+            currentCardIndex = 0;
+            initialize();
+        }
+    });
+    
+    // Switch to all cards button
+    document.getElementById('switch-to-all-btn').addEventListener('click', function() {
+        currentMode = 'all';
+        modeAllBtn.classList.add('active');
+        modeDueBtn.classList.remove('active');
+        
+        // Reset statistics
+        resetStats();
+        
+        // Reset and initialize
+        currentCardIndex = 0;
+        initialize();
+    });
+    
+    // Show answer button
+    if (showAnswerBtn) {
+        showAnswerBtn.addEventListener('click', function() {
+            cardFront.classList.add('d-none');
+            cardBack.classList.remove('d-none');
+        });
+    }
+    
+    // Rating buttons
+    document.querySelectorAll('.rating-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const rating = parseInt(this.getAttribute('data-rating'));
+            const quality = parseInt(this.getAttribute('data-quality'));
+            const currentCard = currentCards[currentCardIndex];
+            
+            // Update statistics
+            if (rating === 1) stats.failed++;
+            else if (rating === 2) stats.hard++;
+            else if (rating === 3) stats.good++;
+            else if (rating === 4) stats.easy++;
+            
+            // Record the review in the spaced repetition system
+            fetch(`/api/flashcards/${flashcardSet.id}/cards/${currentCard.id}/review`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    quality: quality
+                }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update the card with new learning data
+                    if (data.data && data.data.cards) {
+                        for (let i = 0; i < data.data.cards.length; i++) {
+                            if (data.data.cards[i].id === currentCard.id) {
+                                // Update the card in our local array
+                                for (let j = 0; j < cards.length; j++) {
+                                    if (cards[j].id === currentCard.id) {
+                                        cards[j] = data.data.cards[i];
+                                        break;
+                                    }
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // Move to next card
+                    currentCardIndex++;
+                    
+                    // Check if quiz is complete
+                    if (currentCardIndex >= currentCards.length) {
+                        completeQuiz();
+                    } else {
+                        showCard(currentCardIndex);
+                    }
+                } else {
+                    console.error('Error recording review:', data.message);
+                    // Still move to next card even if there was an error
+                    currentCardIndex++;
+                    
+                    if (currentCardIndex >= currentCards.length) {
+                        completeQuiz();
+                    } else {
+                        showCard(currentCardIndex);
+                    }
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // Still move to next card even if there was an error
+                currentCardIndex++;
+                
+                if (currentCardIndex >= currentCards.length) {
+                    completeQuiz();
+                } else {
+                    showCard(currentCardIndex);
+                }
+            });
+        });
+    });
+    
+    // Shuffle button
+    document.getElementById('shuffle-btn').addEventListener('click', function() {
+        // Shuffle the cards
+        currentCards = shuffleArray([...currentCards]);
+        currentCardIndex = 0;
+        showCard(currentCardIndex);
+        
+        // Reset statistics
+        resetStats();
+    });
+    
+    // Restart button
+    document.getElementById('restart-btn').addEventListener('click', function() {
+        currentCardIndex = 0;
+        showCard(currentCardIndex);
+        
+        // Reset statistics
+        resetStats();
+        
+        // Hide quiz complete screen if visible
+        if (quizComplete) {
+            quizComplete = false;
+            flashcardContainer.classList.remove('d-none');
+            quizCompleteContainer.classList.add('d-none');
+        }
+    });
+    
+    // Restart quiz button (on completion screen)
+    document.getElementById('restart-quiz-btn').addEventListener('click', function() {
+        currentCardIndex = 0;
+        showCard(currentCardIndex);
+        
+        // Reset statistics
+        resetStats();
+        
+        // Hide quiz complete screen
+        quizComplete = false;
+        flashcardContainer.classList.remove('d-none');
+        quizCompleteContainer.classList.add('d-none');
+    });
+    
+    // Reset statistics
+    function resetStats() {
+        stats.failed = 0;
+        stats.hard = 0;
+        stats.good = 0;
+        stats.easy = 0;
+    }
+    
+    // Show card function
+    function showCard(index) {
+        // Show the front of the card
+        cardFront.classList.remove('d-none');
+        cardBack.classList.add('d-none');
+        
+        const card = currentCards[index];
+        
+        // Set the question and answer
+        questionText.textContent = card.question;
+        answerText.textContent = card.answer;
+        
+        // Handle image if present
+        if (card.image_url) {
+            cardImage.src = card.image_url;
+            cardImageContainer.classList.remove('d-none');
+        } else {
+            cardImageContainer.classList.add('d-none');
+        }
+        
+        // Handle audio if present
+        if (card.audio_url) {
+            cardAudio.src = card.audio_url;
+            cardAudioContainer.classList.remove('d-none');
+        } else {
+            cardAudioContainer.classList.add('d-none');
+        }
+        
+        // Handle tags if present
+        cardTags.innerHTML = '';
+        if (card.tags && card.tags.length > 0) {
+            card.tags.forEach(tag => {
+                const tagBadge = document.createElement('span');
+                tagBadge.className = 'badge bg-secondary me-1';
+                tagBadge.textContent = tag;
+                cardTags.appendChild(tagBadge);
+            });
+        }
+        
+        // Show next review date if available
+        if (card.learning_data && card.learning_data.next_review) {
+            const nextReview = new Date(card.learning_data.next_review);
+            const now = new Date();
+            const diffDays = Math.round((nextReview - now) / (1000 * 60 * 60 * 24));
+            
+            if (diffDays <= 0) {
+                cardNextDue.textContent = `{{ _('Due now') }}`;
+            } else if (diffDays === 1) {
+                cardNextDue.textContent = `{{ _('Next review: Tomorrow') }}`;
+            } else {
+                cardNextDue.textContent = `{{ _('Next review: In') }} ${diffDays} {{ _('days') }}`;
+            }
+        } else {
+            cardNextDue.textContent = '';
+        }
+        
+        // Update card counter
+        currentCardElement.textContent = index + 1;
+        
+        // Update progress bar
+        const progress = ((index + 1) / currentCards.length) * 100;
+        progressBar.style.width = `${progress}%`;
+        progressBar.textContent = `${Math.round(progress)}%`;
+        progressBar.setAttribute('aria-valuenow', progress);
+    }
+    
+    // Complete quiz function
+    function completeQuiz() {
+        quizComplete = true;
+        
+        // Hide flashcard container
+        flashcardContainer.classList.add('d-none');
+        
+        // Show quiz complete container
+        quizCompleteContainer.classList.remove('d-none');
+        
+        // Update statistics
+        document.getElementById('stat-failed').textContent = stats.failed;
+        document.getElementById('stat-hard').textContent = stats.hard;
+        document.getElementById('stat-good').textContent = stats.good;
+        document.getElementById('stat-easy').textContent = stats.easy;
+        
+        // Set progress bar to 100%
+        progressBar.style.width = '100%';
+        progressBar.textContent = '100%';
+        progressBar.setAttribute('aria-valuenow', 100);
+        
+        // Track completion in gamification system
+        fetch('/api/gamification/track_flashcard_completion', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                set_id: flashcardSet.id,
+                stats: {
+                    failed: stats.failed,
+                    hard: stats.hard,
+                    good: stats.good,
+                    easy: stats.easy,
+                    total: currentCards.length
+                }
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data.points_earned > 0) {
+                // Show a toast or alert with the points earned
+                alert(`${data.data.message}`);
+            }
+        })
+        .catch(error => {
+            console.error('Error tracking flashcard completion:', error);
+        });
+    }
+    
+    // Shuffle array function (Fisher-Yates algorithm)
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+});
+</script>
+{% endblock %}

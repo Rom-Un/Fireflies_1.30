@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Badges') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ _('Badges') }}</h1>
+        <a href="{{ url_for('gamification') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> {{ _('Back to Gamification') }}
+        </a>
+    </div>
+    
+    {% if badges %}
+        <div class="row">
+            {% for badge in badges %}
+                <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="card h-100 border-{% if badge.rarity == 'legendary' %}warning{% elif badge.rarity == 'epic' %}danger{% elif badge.rarity == 'rare' %}primary{% else %}secondary{% endif %}">
+                        <div class="card-header text-center bg-{% if badge.rarity == 'legendary' %}warning{% elif badge.rarity == 'epic' %}danger{% elif badge.rarity == 'rare' %}primary{% else %}secondary{% endif %} text-white">
+                            <h5 class="mb-0">{{ badge.icon }} {{ badge.name }}</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <p>{{ badge.description }}</p>
+                            <span class="badge bg-{% if badge.rarity == 'legendary' %}warning{% elif badge.rarity == 'epic' %}danger{% elif badge.rarity == 'rare' %}primary{% else %}secondary{% endif %}">
+                                {{ badge.rarity|capitalize }}
+                            </span>
+                            <p class="mt-2"><small class="text-muted">{{ _('Earned') }}: {{ badge.date_earned }}</small></p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <h4 class="alert-heading">{{ _('No Badges Yet') }}</h4>
+            <p>{{ _('You haven\'t earned any badges yet. Badges are special rewards for significant achievements!') }}</p>
+            <hr>
+            <p class="mb-0">{{ _('Here are some ways to earn badges:') }}</p>
+            <ul>
+                <li>{{ _('Maintain a long login streak (30+ days)') }}</li>
+                <li>{{ _('Complete many homework assignments (50+)') }}</li>
+                <li>{{ _('Send many messages (30+)') }}</li>
+                <li>{{ _('Complete multiple study plans (10+)') }}</li>
+            </ul>
+        </div>
+    {% endif %}
+    
+    <!-- Badge Rewards -->
+    <h2 class="mt-5 mb-4">{{ _('Badge Rewards') }}</h2>
+    <div class="row">
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">{{ _('Legendary Badges') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">🔥 Légende de l'Assiduité</h6>
+                                <small class="badge bg-warning">Legendary</small>
+                            </div>
+                            <p class="mb-1">Connexion pendant 100 jours consécutifs</p>
+                            <p class="mb-0"><strong>{{ _('Reward') }}:</strong> Bouclier Permanent (protège votre série une fois par semaine)</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">📚 Érudit des Devoirs</h6>
+                                <small class="badge bg-warning">Legendary</small>
+                            </div>
+                            <p class="mb-1">Terminer 200 devoirs</p>
+                            <p class="mb-0"><strong>{{ _('Reward') }}:</strong> Points Doublés (double les points pour tous les devoirs pendant 7 jours)</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">📝 Maître de l'Étude</h6>
+                                <small class="badge bg-warning">Legendary</small>
+                            </div>
+                            <p class="mb-1">Compléter 10 plans d'étude</p>
+                            <p class="mb-0"><strong>{{ _('Reward') }}:</strong> Triple XP pour les exercices de plan d'étude pendant 7 jours</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">{{ _('Epic & Rare Badges') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">🔥 Guerrier Saisonnier</h6>
+                                <small class="badge bg-danger">Epic</small>
+                            </div>
+                            <p class="mb-1">Connexion pendant 60 jours consécutifs</p>
+                            <p class="mb-0"><strong>{{ _('Reward') }}:</strong> Thème Flamme Sombre</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">📚 Légende des Devoirs</h6>
+                                <small class="badge bg-danger">Epic</small>
+                            </div>
+                            <p class="mb-1">Terminer 100 devoirs</p>
+                            <p class="mb-0"><strong>{{ _('Reward') }}:</strong> Thème Érudit</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">💬 Maître de la Communication</h6>
+                                <small class="badge bg-danger">Epic</small>
+                            </div>
+                            <p class="mb-1">Envoyer 50 messages</p>
+                            <p class="mb-0"><strong>{{ _('Reward') }}:</strong> Thème Social</p>
+                        </div>
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">🔥 Maître du Mois</h6>
+                                <small class="badge bg-primary">Rare</small>
+                            </div>
+                            <p class="mb-1">Connexion pendant 30 jours consécutifs</p>
+                            <p class="mb-0"><strong>{{ _('Reward') }}:</strong> Avatar Maître des Flammes</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

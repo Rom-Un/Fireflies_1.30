@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block title %}Homework Priority System - Fireflies{% endblock %}
+
+{% block content %}
+<h1 class="page-title">
+    <i class="fas fa-tasks me-2"></i>Homework Priority System
+</h1>
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>About the Priority System</h5>
+            </div>
+            <div class="card-body">
+                <p>The Homework Priority System automatically organizes your assignments based on:</p>
+                <ul>
+                    <li><strong>Due Date</strong> - Assignments due soon are given higher priority</li>
+                    <li><strong>Estimated Completion Time</strong> - You can set how long each assignment will take</li>
+                    <li><strong>Subject Importance</strong> - Based on your study patterns and preferences</li>
+                </ul>
+                <p>This helps you focus on what's most important and ensures you never miss a deadline.</p>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    <strong>Tip:</strong> Update the estimated completion time for each assignment to get more accurate priorities.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h5 class="mb-0"><i class="fas fa-exclamation-circle me-2"></i>High Priority</h5>
+            </div>
+            <div class="card-body">
+                {% if high_priority %}
+                    <div class="list-group">
+                        {% for hw in high_priority %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ hw.subject }}</h6>
+                                <small>
+                                    {% if hw.days_until_due < 0 %}
+                                        <span class="badge bg-danger">Overdue</span>
+                                    {% elif hw.days_until_due == 0 %}
+                                        <span class="badge bg-danger">Today</span>
+                                    {% elif hw.days_until_due == 1 %}
+                                        <span class="badge bg-warning text-dark">Tomorrow</span>
+                                    {% else %}
+                                        <span class="badge bg-info">{{ hw.days_until_due }} days</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <p class="mb-1">{{ hw.description|truncate(100) }}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted">Due: {{ hw.date }}</small>
+                                <div class="input-group input-group-sm" style="max-width: 150px;">
+                                    <input type="number" class="form-control form-control-sm estimated-time-input" 
+                                           data-homework-id="{{ hw.id }}" value="{{ hw.estimated_time|default(60) }}" min="5" max="480">
+                                    <span class="input-group-text">min</span>
+                                    <button class="btn btn-sm btn-outline-primary save-time-btn" data-homework-id="{{ hw.id }}">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3">No high priority homework</h5>
+                        <p class="text-muted">You're on top of things!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"><i class="fas fa-clock me-2"></i>Medium Priority</h5>
+            </div>
+            <div class="card-body">
+                {% if medium_priority %}
+                    <div class="list-group">
+                        {% for hw in medium_priority %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ hw.subject }}</h6>
+                                <small>
+                                    <span class="badge bg-info">{{ hw.days_until_due }} days</span>
+                                </small>
+                            </div>
+                            <p class="mb-1">{{ hw.description|truncate(100) }}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted">Due: {{ hw.date }}</small>
+                                <div class="input-group input-group-sm" style="max-width: 150px;">
+                                    <input type="number" class="form-control form-control-sm estimated-time-input" 
+                                           data-homework-id="{{ hw.id }}" value="{{ hw.estimated_time|default(60) }}" min="5" max="480">
+                                    <span class="input-group-text">min</span>
+                                    <button class="btn btn-sm btn-outline-primary save-time-btn" data-homework-id="{{ hw.id }}">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3">No medium priority homework</h5>
+                        <p class="text-muted">You're doing great!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4 mb-4">
+        <div class="card border-info">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Low Priority</h5>
+            </div>
+            <div class="card-body">
+                {% if low_priority %}
+                    <div class="list-group">
+                        {% for hw in low_priority %}
+                        <div class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ hw.subject }}</h6>
+                                <small>
+                                    <span class="badge bg-info">{{ hw.days_until_due }} days</span>
+                                </small>
+                            </div>
+                            <p class="mb-1">{{ hw.description|truncate(100) }}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <small class="text-muted">Due: {{ hw.date }}</small>
+                                <div class="input-group input-group-sm" style="max-width: 150px;">
+                                    <input type="number" class="form-control form-control-sm estimated-time-input" 
+                                           data-homework-id="{{ hw.id }}" value="{{ hw.estimated_time|default(60) }}" min="5" max="480">
+                                    <span class="input-group-text">min</span>
+                                    <button class="btn btn-sm btn-outline-primary save-time-btn" data-homework-id="{{ hw.id }}">
+                                        <i class="fas fa-save"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                        <h5 class="mt-3">No low priority homework</h5>
+                        <p class="text-muted">Your schedule is clear!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Study Schedule Integration</h5>
+                <a href="{{ url_for('fireflies_routes.study_schedule') }}" class="btn btn-primary">
+                    <i class="fas fa-calendar-alt me-1"></i>Go to Study Schedule
+                </a>
+            </div>
+            <div class="card-body">
+                <p>Your homework priorities are automatically integrated with the Study Schedule Builder to help you plan your study time effectively.</p>
+                
+                <div class="alert alert-success">
+                    <i class="fas fa-magic me-2"></i>
+                    <strong>Smart Scheduling:</strong> The Study Schedule Builder will automatically suggest study sessions for your high-priority assignments.
+                </div>
+                
+                <p>Visit the Study Schedule Builder to:</p>
+                <ul>
+                    <li>Create an optimal study plan based on your homework priorities</li>
+                    <li>Set up recurring study blocks for different subjects</li>
+                    <li>Sync your study schedule with external calendars</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Save estimated time for homework
+        document.querySelectorAll('.save-time-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const homeworkId = this.getAttribute('data-homework-id');
+                const input = document.querySelector(`.estimated-time-input[data-homework-id="${homeworkId}"]`);
+                const estimatedTime = parseInt(input.value);
+                
+                // Validate input
+                if (isNaN(estimatedTime) || estimatedTime < 5 || estimatedTime > 480) {
+                    alert('Please enter a valid time between 5 and 480 minutes');
+                    return;
+                }
+                
+                // Show loading state
+                this.disabled = true;
+                const originalHTML = this.innerHTML;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                
+                // Send request to update estimated time
+                fetch('/api/homework/update_time', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        homework_id: homeworkId,
+                        estimated_time: estimatedTime
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Reset button state
+                    this.disabled = false;
+                    this.innerHTML = originalHTML;
+                    
+                    if (data.success) {
+                        // Show success message
+                        const successIcon = document.createElement('i');
+                        successIcon.className = 'fas fa-check text-success';
+                        this.appendChild(successIcon);
+                        
+                        // Remove success icon after 2 seconds
+                        setTimeout(() => {
+                            this.innerHTML = originalHTML;
+                        }, 2000);
+                    } else {
+                        alert('Error updating estimated time: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    // Reset button state
+                    this.disabled = false;
+                    this.innerHTML = originalHTML;
+                    
+                    console.error('Error:', error);
+                    alert('Error updating estimated time');
+                });
+            });
+        });
+    });
+</script>
+{% endblock %}

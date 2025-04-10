@@ -1,0 +1,195 @@
+/* AI Learning Assistant Styles */
+
+.ai-assistant-container {
+    margin-top: 2rem;
+}
+
+.ai-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 1.5rem;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.ai-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.ai-card .card-header {
+    font-weight: 600;
+    padding: 1rem;
+}
+
+.ai-tabs .nav-link {
+    padding: 0.75rem 1.25rem;
+    font-weight: 500;
+    border-radius: 0.5rem 0.5rem 0 0;
+    transition: all 0.2s ease;
+}
+
+.ai-tabs .nav-link.active {
+    font-weight: 600;
+}
+
+.ai-tabs .nav-link i {
+    margin-right: 0.5rem;
+}
+
+.ai-tab-content {
+    padding: 1.5rem;
+    border: 1px solid #dee2e6;
+    border-top: 0;
+    border-radius: 0 0 0.5rem 0.5rem;
+}
+
+/* Flashcard Generator */
+.flashcard-generator-form textarea {
+    min-height: 200px;
+    font-size: 0.9rem;
+}
+
+.flashcard-generator-result {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+/* Practice Questions */
+.practice-question {
+    margin-bottom: 1.5rem;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.practice-question .card-header {
+    padding: 0.75rem 1rem;
+}
+
+.practice-question .question-text {
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.practice-question .options {
+    margin-bottom: 1rem;
+}
+
+.practice-question .form-check {
+    margin-bottom: 0.5rem;
+    padding-left: 2rem;
+}
+
+.practice-question .form-check-input {
+    margin-top: 0.3rem;
+}
+
+.practice-question .feedback {
+    margin-top: 1rem;
+}
+
+/* Study Recommendations */
+.recommendation-card {
+    height: 100%;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.recommendation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.recommendation-card .card-header {
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+}
+
+.recommendation-count {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-right: 1rem;
+}
+
+.study-tip-card {
+    height: 100%;
+    border-left: 4px solid var(--warning-color);
+    transition: transform 0.3s ease;
+}
+
+.study-tip-card:hover {
+    transform: translateX(5px);
+}
+
+.study-tip-icon {
+    font-size: 1.25rem;
+    color: var(--warning-color);
+    margin-right: 0.5rem;
+}
+
+/* Animations */
+.fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading Spinner */
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+}
+
+.spinner {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .ai-tabs .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .recommendation-count {
+        font-size: 2rem;
+    }
+}
+
+/* Dark mode adjustments */
+.theme-dark .ai-tab-content {
+    border-color: #444;
+}
+
+.theme-dark .study-tip-card {
+    border-left-color: #ff9800;
+}
+
+.theme-dark .study-tip-icon {
+    color: #ff9800;
+}
+
+/* High contrast mode */
+.high-contrast .ai-tabs .nav-link.active {
+    background-color: #000;
+    color: #fff;
+}
+
+.high-contrast .practice-question .card-header,
+.high-contrast .recommendation-card .card-header {
+    background-color: #000;
+    color: #fff;
+}
+
+.high-contrast .study-tip-card {
+    border-left-color: #000;
+}
+
+.high-contrast .study-tip-icon {
+    color: #000;
+}

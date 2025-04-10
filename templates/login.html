@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Connexion - Fireflies{% endblock %}
+
+{% block content %}
+<div class="login-container fade-in">
+    <div class="login-logo">
+        <i class="fas fa-fire"></i>
+    </div>
+    <h1 class="login-title">Connexion à Fireflies</h1>
+
+    <div class="card">
+        <div class="card-body p-4">
+            <form method="post" action="{{ url_for('login') }}">
+                <div class="mb-4">
+                    <label for="url" class="form-label">
+                        <i class="fas fa-link me-2"></i>URL
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-globe"></i></span>
+                        <input type="text" class="form-control" id="url" name="url" required
+                               value="{{ saved_credentials.url if saved_credentials else '' }}">
+                    </div>
+                    <div class="form-text">Lien direct vers le fichier HTML Pronote (se termine par .html)</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="username" class="form-label">
+                        <i class="fas fa-user me-2"></i>Nom d'utilisateur
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                        <input type="text" class="form-control" id="username" name="username" required
+                               value="{{ saved_credentials.username if saved_credentials else '' }}">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="password" class="form-label">
+                        <i class="fas fa-lock me-2"></i>Mot de passe
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" required
+                               value="{{ saved_credentials.password if saved_credentials else '' }}">
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="use_ent" name="use_ent"
+                               onchange="toggleEntSelection()"
+                               {% if saved_credentials and saved_credentials.use_ent %}checked{% endif %}>
+                        <label class="form-check-label" for="use_ent">
+                            <i class="fas fa-school me-2"></i>ENT
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-4" id="ent_selection" style="display: none;">
+                    <label for="ent_name" class="form-label">
+                        <i class="fas fa-building-columns me-2"></i>Sélectionner l'ENT
+                    </label>
+                    <select class="form-select" id="ent_name" name="ent_name">
+                        <option value="ac_reunion" {% if saved_credentials and saved_credentials.ent_name == 'ac_reunion' %}selected{% endif %}>Académie de La Réunion</option>
+                        <option value="ac_reims" {% if saved_credentials and saved_credentials.ent_name == 'ac_reims' %}selected{% endif %}>Académie de Reims</option>
+                        <option value="ac_orleans_tours" {% if saved_credentials and saved_credentials.ent_name == 'ac_orleans_tours' %}selected{% endif %}>Académie d'Orléans-Tours</option>
+                        <option value="ac_montpellier" {% if saved_credentials and saved_credentials.ent_name == 'ac_montpellier' %}selected{% endif %}>Académie de Montpellier</option>
+                        <option value="ac_lille" {% if saved_credentials and saved_credentials.ent_name == 'ac_lille' %}selected{% endif %}>Académie de Lille</option>
+                        <option value="ac_nancy_metz" {% if saved_credentials and saved_credentials.ent_name == 'ac_nancy_metz' %}selected{% endif %}>Académie de Nancy-Metz</option>
+                        <option value="ac_nantes" {% if saved_credentials and saved_credentials.ent_name == 'ac_nantes' %}selected{% endif %}>Académie de Nantes</option>
+                        <option value="ac_bordeaux" {% if saved_credentials and saved_credentials.ent_name == 'ac_bordeaux' %}selected{% endif %}>Académie de Bordeaux</option>
+                        <option value="ac_toulouse" {% if saved_credentials and saved_credentials.ent_name == 'ac_toulouse' %}selected{% endif %}>Académie de Toulouse</option>
+                        <option value="ac_caen" {% if saved_credentials and saved_credentials.ent_name == 'ac_caen' %}selected{% endif %}>Académie de Caen</option>
+                        <option value="ac_rouen" {% if saved_credentials and saved_credentials.ent_name == 'ac_rouen' %}selected{% endif %}>Académie de Rouen</option>
+                        <option value="ac_poitiers" {% if saved_credentials and saved_credentials.ent_name == 'ac_poitiers' %}selected{% endif %}>Académie de Poitiers</option>
+                        <option value="ac_grenoble" {% if saved_credentials and saved_credentials.ent_name == 'ac_grenoble' %}selected{% endif %}>Académie de Grenoble</option>
+                        <option value="ac_lyon" {% if saved_credentials and saved_credentials.ent_name == 'ac_lyon' %}selected{% endif %}>Académie de Lyon</option>
+                        <option value="ac_clermont" {% if saved_credentials and saved_credentials.ent_name == 'ac_clermont' %}selected{% endif %}>Académie de Clermont-Ferrand</option>
+                        <option value="ac_dijon" {% if saved_credentials and saved_credentials.ent_name == 'ac_dijon' %}selected{% endif %}>Académie de Dijon</option>
+                        <option value="ac_besancon" {% if saved_credentials and saved_credentials.ent_name == 'ac_besancon' %}selected{% endif %}>Académie de Besançon</option>
+                        <option value="ac_strasbourg" {% if saved_credentials and saved_credentials.ent_name == 'ac_strasbourg' %}selected{% endif %}>Académie de Strasbourg</option>
+                        <option value="ac_creteil" {% if saved_credentials and saved_credentials.ent_name == 'ac_creteil' %}selected{% endif %}>Académie de Créteil</option>
+                        <option value="ac_versailles" {% if saved_credentials and saved_credentials.ent_name == 'ac_versailles' %}selected{% endif %}>Académie de Versailles</option>
+                        <option value="ac_paris" {% if saved_credentials and saved_credentials.ent_name == 'ac_paris' %}selected{% endif %}>Académie de Paris</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="save_credentials" name="save_credentials"
+                               {% if saved_credentials %}checked{% endif %}>
+                        <label class="form-check-label" for="save_credentials">
+                            <i class="fas fa-save me-2"></i>Enregistrer les identifiants
+                        </label>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>Connexion
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="mt-4 text-center text-muted">
+        <small>Vos identifiants sont chiffrés et stockés en toute sécurité uniquement sur votre appareil.</small>
+    </div>
+</div>
+
+<script>
+    // Initialize ENT selection visibility
+    document.addEventListener('DOMContentLoaded', function() {
+        toggleEntSelection();
+    });
+
+    function toggleEntSelection() {
+        const useEnt = document.getElementById('use_ent').checked;
+        const entSelection = document.getElementById('ent_selection');
+        entSelection.style.display = useEnt ? 'block' : 'none';
+    }
+
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordInput = document.getElementById('password');
+        const icon = this.querySelector('i');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordInput.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
+</script>
+{% endblock %}

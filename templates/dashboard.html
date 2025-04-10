@@ -1,0 +1,465 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de bord - Fireflies{% endblock %}
+
+{% block content %}
+<div class="fade-in">
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center">
+                <div class="flex-shrink-0">
+                    <div class="avatar-circle">
+                        <span class="initials">{{ username[0]|upper }}</span>
+                    </div>
+                </div>
+                <div class="flex-grow-1 ms-3">
+                    <h1 class="display-5 mb-1">Bienvenue, {{ username }} !</h1>
+                    <p class="lead text-muted mb-0">Voici votre tableau de bord Pronote pour aujourd'hui, {{ today_date }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Today's Schedule -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-calendar-day me-2"></i>Emploi du temps d'aujourd'hui</h5>
+                    <a href="{{ url_for('timetable') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-calendar-alt me-1"></i>Emploi du temps complet
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if today_lessons %}
+                        <div class="timeline">
+                            {% for lesson in today_lessons %}
+                            <div class="timeline-item">
+                                <div class="timeline-badge" style="background-color:
+                                    {% set colors = ['#4361ee', '#3a0ca3', '#4895ef', '#4cc9f0', '#f72585', '#7209b7', '#560bad', '#480ca8', '#3f37c9', '#4361ee'] %}
+                                    {{ colors[loop.index0 % colors|length] }};">
+                                    <i class="fas fa-book"></i>
+                                </div>
+                                <div class="timeline-content">
+                                    <div class="timeline-time">{{ lesson.start }} - {{ lesson.end }}</div>
+                                    <h6 class="timeline-title">{{ lesson.subject }}</h6>
+                                    <div class="timeline-text">
+                                        {% if lesson.room %}
+                                        <span class="badge bg-light text-dark me-2">
+                                            <i class="fas fa-door-open me-1"></i>{{ lesson.room }}
+                                        </span>
+                                        {% endif %}
+                                        {% if lesson.teacher %}
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-chalkboard-teacher me-1"></i>{{ lesson.teacher }}
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times text-muted" style="font-size: 3rem;"></i>
+                            <h5 class="mt-3">Aucun cours prévu pour aujourd'hui</h5>
+                            <p class="text-muted">Profitez de votre journée libre !</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Upcoming Homework -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-book me-2"></i>Devoirs à venir</h5>
+                    <a href="{{ url_for('homework') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-list me-1"></i>Tous les devoirs
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_homework %}
+                        <div class="list-group">
+                            {% for hw in upcoming_homework %}
+                            <div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ hw.subject }}</h6>
+                                    <small class="text-muted">Pour le : {{ hw.date }}</small>
+                                </div>
+                                <p class="mb-1">{{ hw.description }}</p>
+                                <small class="text-muted">
+                                    Statut :
+                                    {% if hw.done %}
+                                    <span class="badge bg-success">Fait</span>
+                                    {% else %}
+                                    <span class="badge bg-warning text-dark">Non fait</span>
+                                    {% endif %}
+                                </small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle text-success" style="font-size: 3rem;"></i>
+                            <h5 class="mt-3">Aucun devoir à venir</h5>
+                            <p class="text-muted">Vous êtes à jour !</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Actions rapides</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('homework') }}" class="btn btn-primary">
+                            <i class="fas fa-book me-2"></i>Voir les devoirs
+                        </a>
+                        <a href="{{ url_for('grades') }}" class="btn btn-primary">
+                            <i class="fas fa-chart-line me-2"></i>Consulter les notes
+                        </a>
+                        <a href="{{ url_for('timetable') }}" class="btn btn-primary">
+                            <i class="fas fa-calendar-alt me-2"></i>Voir l'emploi du temps
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Grades -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Notes récentes</h5>
+                    <a href="{{ url_for('grades') }}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-graduation-cap me-1"></i>Toutes les notes
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if recent_grades %}
+                        <div class="list-group">
+                            {% for grade in recent_grades %}
+                            <div class="list-group-item">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ grade.subject }}</h6>
+                                    <span class="badge bg-primary">{{ grade.grade }}/{{ grade.out_of }} (coef. {{ grade.coefficient }})</span>
+                                </div>
+                                <small class="text-muted">{{ grade.date }}</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-graduation-cap text-muted" style="font-size: 3rem;"></i>
+                            <h5 class="mt-3">Pas de notes récentes</h5>
+                            <p class="text-muted">Vérifiez vos notes plus tard</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Calendar and Task Management Section -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Study Schedule & Homework Priority</h5>
+                    <div>
+                        <a href="{{ url_for('fireflies_routes.study_schedule') }}" class="btn btn-sm btn-outline-primary me-2">
+                            <i class="fas fa-calendar-alt me-1"></i>Study Schedule
+                        </a>
+                        <a href="{{ url_for('fireflies_routes.homework_priority') }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-tasks me-1"></i>Homework Priority
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="mb-3"><i class="fas fa-calendar-day me-2"></i>Today's Study Sessions</h6>
+                            <div id="todayStudySessions">
+                                <div class="text-center py-3">
+                                    <i class="fas fa-spinner fa-spin text-primary" style="font-size: 1.5rem;"></i>
+                                    <p class="mt-2">Loading study sessions...</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="mb-3"><i class="fas fa-exclamation-circle me-2"></i>High Priority Homework</h6>
+                            <div id="highPriorityHomework">
+                                <div class="text-center py-3">
+                                    <i class="fas fa-spinner fa-spin text-primary" style="font-size: 1.5rem;"></i>
+                                    <p class="mt-2">Loading priority homework...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load today's study sessions
+        fetch('/api/study_schedule/build', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                start_date: new Date().toISOString().split('T')[0],
+                days_ahead: 1
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('todayStudySessions');
+            
+            if (data.success && data.schedule && data.schedule.length > 0) {
+                // Filter for today's sessions
+                const today = new Date().toISOString().split('T')[0];
+                const todaySessions = data.schedule.filter(session => session.date === today);
+                
+                if (todaySessions.length > 0) {
+                    // Create HTML for sessions
+                    let html = '<div class="list-group">';
+                    
+                    todaySessions.forEach(session => {
+                        html += `
+                            <div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">${session.subject}</h6>
+                                    <small>${session.start_time} - ${session.end_time}</small>
+                                </div>
+                                <p class="mb-1 small">Duration: ${session.duration} minutes</p>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    container.innerHTML = html;
+                } else {
+                    // No sessions today
+                    container.innerHTML = `
+                        <div class="text-center py-3">
+                            <i class="fas fa-calendar-check text-muted" style="font-size: 2rem;"></i>
+                            <h6 class="mt-2">No study sessions scheduled for today</h6>
+                            <a href="${window.location.origin}/study_schedule" class="btn btn-sm btn-primary mt-2">
+                                <i class="fas fa-plus me-1"></i>Schedule a Session
+                            </a>
+                        </div>
+                    `;
+                }
+            } else {
+                // Error or no sessions
+                container.innerHTML = `
+                    <div class="text-center py-3">
+                        <i class="fas fa-calendar-check text-muted" style="font-size: 2rem;"></i>
+                        <h6 class="mt-2">No study sessions scheduled</h6>
+                        <a href="${window.location.origin}/study_schedule" class="btn btn-sm btn-primary mt-2">
+                            <i class="fas fa-plus me-1"></i>Create Study Schedule
+                        </a>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('todayStudySessions').innerHTML = `
+                <div class="text-center py-3">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                    <h6 class="mt-2">Could not load study sessions</h6>
+                    <p class="text-muted small">Please try again later</p>
+                </div>
+            `;
+        });
+        
+        // Load high priority homework
+        fetch('/api/homework/update_time', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                homework_id: 'dummy',
+                estimated_time: 60
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('highPriorityHomework');
+            
+            if (data.success && data.homework && data.homework.length > 0) {
+                // Filter for high priority homework
+                const highPriority = data.homework.filter(hw => hw.priority_level === 'high');
+                
+                if (highPriority.length > 0) {
+                    // Create HTML for homework
+                    let html = '<div class="list-group">';
+                    
+                    // Show only up to 3 items
+                    const displayItems = highPriority.slice(0, 3);
+                    
+                    displayItems.forEach(hw => {
+                        let badgeClass = 'bg-info';
+                        let badgeText = `${hw.days_until_due} days`;
+                        
+                        if (hw.days_until_due < 0) {
+                            badgeClass = 'bg-danger';
+                            badgeText = 'Overdue';
+                        } else if (hw.days_until_due === 0) {
+                            badgeClass = 'bg-danger';
+                            badgeText = 'Today';
+                        } else if (hw.days_until_due === 1) {
+                            badgeClass = 'bg-warning text-dark';
+                            badgeText = 'Tomorrow';
+                        }
+                        
+                        html += `
+                            <div class="list-group-item list-group-item-action">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">${hw.subject}</h6>
+                                    <small><span class="badge ${badgeClass}">${badgeText}</span></small>
+                                </div>
+                                <p class="mb-1 small">${hw.description ? hw.description.substring(0, 50) + '...' : 'No description'}</p>
+                                <small class="text-muted">Due: ${hw.date}</small>
+                            </div>
+                        `;
+                    });
+                    
+                    if (highPriority.length > 3) {
+                        html += `
+                            <div class="list-group-item text-center">
+                                <a href="${window.location.origin}/homework_priority" class="btn btn-sm btn-link">
+                                    View ${highPriority.length - 3} more high priority items
+                                </a>
+                            </div>
+                        `;
+                    }
+                    
+                    html += '</div>';
+                    container.innerHTML = html;
+                } else {
+                    // No high priority homework
+                    container.innerHTML = `
+                        <div class="text-center py-3">
+                            <i class="fas fa-check-circle text-success" style="font-size: 2rem;"></i>
+                            <h6 class="mt-2">No high priority homework</h6>
+                            <p class="text-muted small">You're on top of things!</p>
+                        </div>
+                    `;
+                }
+            } else {
+                // Error or no homework
+                container.innerHTML = `
+                    <div class="text-center py-3">
+                        <i class="fas fa-tasks text-muted" style="font-size: 2rem;"></i>
+                        <h6 class="mt-2">No homework found</h6>
+                        <a href="${window.location.origin}/homework_priority" class="btn btn-sm btn-primary mt-2">
+                            <i class="fas fa-plus me-1"></i>View Homework Priority
+                        </a>
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('highPriorityHomework').innerHTML = `
+                <div class="text-center py-3">
+                    <i class="fas fa-exclamation-triangle text-warning" style="font-size: 2rem;"></i>
+                    <h6 class="mt-2">Could not load homework</h6>
+                    <p class="text-muted small">Please try again later</p>
+                </div>
+            `;
+        });
+    });
+</script>
+<style>
+    .avatar-circle {
+        width: 80px;
+        height: 80px;
+        background-color: #4361ee;
+        text-align: center;
+        border-radius: 50%;
+        -webkit-border-radius: 50%;
+        -moz-border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .initials {
+        font-size: 40px;
+        line-height: 1;
+        color: white;
+        font-weight: bold;
+    }
+
+    .timeline {
+        position: relative;
+        padding: 20px 0;
+    }
+
+    .timeline:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background: #e9ecef;
+        left: 20px;
+        margin-left: -1.5px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 30px;
+    }
+
+    .timeline-badge {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        color: #fff;
+        text-align: center;
+        line-height: 40px;
+        position: absolute;
+        left: 20px;
+        margin-left: -20px;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .timeline-content {
+        position: relative;
+        margin-left: 60px;
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    }
+
+    .timeline-time {
+        font-weight: 600;
+        color: #4361ee;
+        margin-bottom: 5px;
+    }
+
+    .timeline-title {
+        margin-top: 0;
+        margin-bottom: 10px;
+        color: #212529;
+    }
+
+    .timeline-text {
+        margin-bottom: 0;
+    }
+</style>
+{% endblock %}

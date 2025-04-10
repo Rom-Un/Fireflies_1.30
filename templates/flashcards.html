@@ -1,0 +1,307 @@
+{% extends 'base.html' %}
+
+{% block title %}Flashcards - Fireflies{% endblock %}
+
+{% block content %}
+<div class="container fade-in">
+    <h1 class="page-title">{{ _('Flashcards & Lessons') }}</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ _('Create New Flashcard Set') }}</h5>
+                </div>
+                <div class="card-body">
+                    <form id="create-flashcard-form">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="flashcard-name" class="form-label">{{ _('Set Name') }}</label>
+                                <input type="text" class="form-control" id="flashcard-name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="flashcard-subject" class="form-label">{{ _('Subject') }}</label>
+                                <div class="input-group">
+                                    <select class="form-select" id="flashcard-subject-select" onchange="updateCreateSubject()">
+                                        <option value="" selected disabled>{{ _('Select a subject or enter your own') }}</option>
+                                        <option value="Mathematics">Mathematics</option>
+                                        <option value="Science">Science</option>
+                                        <option value="History">History</option>
+                                        <option value="Languages">Languages</option>
+                                        <option value="Computer Science">Computer Science</option>
+                                        <option value="Other">Other</option>
+                                        {% if subjects %}
+                                            {% for subject in subjects %}
+                                                {% if subject not in ['Mathematics', 'Science', 'History', 'Languages', 'Computer Science', 'Other'] %}
+                                                <option value="{{ subject }}">{{ subject }}</option>
+                                                {% endif %}
+                                            {% endfor %}
+                                        {% endif %}
+                                        <option value="custom">{{ _('Custom...') }}</option>
+                                    </select>
+                                    <input type="text" class="form-control" id="flashcard-subject-custom" placeholder="{{ _('Enter subject') }}" style="display: none;">
+                                    <input type="hidden" id="flashcard-subject" name="subject" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="flashcard-description" class="form-label">{{ _('Description') }}</label>
+                            <textarea class="form-control" id="flashcard-description" rows="2"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus-circle me-2"></i>{{ _('Create Flashcard Set') }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ _('My Flashcard Sets') }}</h5>
+                    <div>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="search-flashcards" placeholder="{{ _('Search flashcards...') }}">
+                            <button class="btn btn-outline-secondary" type="button" id="search-button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if flashcard_sets %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{{ _('Name') }}</th>
+                                    <th>{{ _('Subject') }}</th>
+                                    <th>{{ _('Cards') }}</th>
+                                    <th>{{ _('Created') }}</th>
+                                    <th>{{ _('Actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="flashcard-sets-table">
+                                {% for set in flashcard_sets %}
+                                <tr>
+                                    <td>{{ set.name }}</td>
+                                    <td>{{ set.subject }}</td>
+                                    <td>{{ set.card_count }}</td>
+                                    <td>{{ set.created_at }}</td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="/flashcards/quiz/{{ set.id }}" class="btn btn-sm btn-success">
+                                                <i class="fas fa-play me-1"></i>{{ _('Quiz') }}
+                                            </a>
+                                            <a href="/flashcards/edit/{{ set.id }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit me-1"></i>{{ _('Edit') }}
+                                            </a>
+                                            <button class="btn btn-sm btn-danger delete-set" data-set-id="{{ set.id }}">
+                                                <i class="fas fa-trash me-1"></i>{{ _('Delete') }}
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-graduation-cap fa-4x mb-3 text-muted"></i>
+                        <h4>{{ _('No flashcard sets yet') }}</h4>
+                        <p class="text-muted">{{ _('Create your first flashcard set to start studying!') }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Study Tips') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-lightbulb fa-2x text-warning"></i>
+                                </div>
+                                <div>
+                                    <h5>{{ _('Create Effective Flashcards') }}</h5>
+                                    <p class="text-muted">{{ _('Keep questions clear and concise. One concept per card.') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-clock fa-2x text-info"></i>
+                                </div>
+                                <div>
+                                    <h5>{{ _('Spaced Repetition') }}</h5>
+                                    <p class="text-muted">{{ _('Review cards at increasing intervals to improve long-term retention.') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="me-3">
+                                    <i class="fas fa-brain fa-2x text-primary"></i>
+                                </div>
+                                <div>
+                                    <h5>{{ _('Active Recall') }}</h5>
+                                    <p class="text-muted">{{ _('Test yourself actively rather than passively reading the material.') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Using browser's native confirm dialog instead of Bootstrap modal -->
+
+<script>
+// Function to update the subject field based on selection
+function updateCreateSubject() {
+    const selectElement = document.getElementById('flashcard-subject-select');
+    const customInput = document.getElementById('flashcard-subject-custom');
+    const hiddenInput = document.getElementById('flashcard-subject');
+    
+    if (selectElement.value === 'custom') {
+        // Show custom input field
+        customInput.style.display = 'block';
+        customInput.focus();
+        hiddenInput.value = customInput.value;
+    } else {
+        // Hide custom input field and use selected value
+        customInput.style.display = 'none';
+        hiddenInput.value = selectElement.value;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up custom subject input
+    const customInput = document.getElementById('flashcard-subject-custom');
+    if (customInput) {
+        customInput.addEventListener('input', function() {
+            document.getElementById('flashcard-subject').value = this.value;
+        });
+    }
+    
+    // Initial call to set the correct value
+    updateCreateSubject();
+    
+    // Create flashcard set form submission
+    const createForm = document.getElementById('create-flashcard-form');
+    createForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const name = document.getElementById('flashcard-name').value;
+        const subject = document.getElementById('flashcard-subject').value;
+        const description = document.getElementById('flashcard-description').value;
+        
+        // Validate inputs
+        if (!name.trim()) {
+            alert("{{ _('Please enter a set name') }}");
+            return;
+        }
+        
+        if (!subject.trim()) {
+            alert("{{ _('Please select or enter a subject') }}");
+            return;
+        }
+        
+        fetch('/api/flashcards', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                subject: subject,
+                description: description
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect to edit page for the new set
+                window.location.href = `/flashcards/edit/${data.data.id}`;
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred while creating the flashcard set.');
+        });
+    });
+    
+    // Delete flashcard set - using simple confirm instead of modal
+    document.querySelectorAll('.delete-set').forEach(button => {
+        button.addEventListener('click', function() {
+            const setId = this.getAttribute('data-set-id');
+
+            // Use simple browser confirm dialog instead of Bootstrap modal
+            if (confirm('Are you sure you want to delete this flashcard set? This action cannot be undone.')) {
+                // Delete the flashcard set
+                fetch(`/api/flashcards/${setId}`, {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload the page to show updated list
+                        window.location.reload();
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while deleting the flashcard set.');
+                });
+            }
+        });
+    });
+    
+    // Search functionality
+    const searchInput = document.getElementById('search-flashcards');
+    const searchButton = document.getElementById('search-button');
+    
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const rows = document.querySelectorAll('#flashcard-sets-table tr');
+        
+        rows.forEach(row => {
+            const name = row.cells[0].textContent.toLowerCase();
+            const subject = row.cells[1].textContent.toLowerCase();
+            
+            if (name.includes(searchTerm) || subject.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    searchButton.addEventListener('click', performSearch);
+    searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+});
+</script>
+{% endblock %}

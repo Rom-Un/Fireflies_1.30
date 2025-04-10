@@ -1,0 +1,10 @@
+{
+  "dark_mode": false,
+  "high_contrast": false,
+  "reduced_motion": false,
+  "font_family": "'Open Sans', sans-serif",
+  "line_spacing": 1,
+  "keyboard_shortcuts": true,
+  "enhanced_a11y": true,
+  "text_size": 120
+}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Leaderboard') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ _('Leaderboard') }}</h1>
+        <a href="{{ url_for('gamification') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> {{ _('Back to Gamification') }}
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">{{ _('Top Users') }}</h5>
+        </div>
+        <div class="card-body">
+            {% if leaderboard %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>{{ _('User') }}</th>
+                                <th>{{ _('Level') }}</th>
+                                <th>{{ _('Points') }}</th>
+                                <th>{{ _('Streak') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in leaderboard %}
+                                <tr {% if user.username == current_user %}class="table-primary"{% endif %}>
+                                    <td>{{ loop.index }}</td>
+                                    <td>
+                                        {% if user.username == current_user %}
+                                            <strong>{{ user.username }} ({{ _('You') }})</strong>
+                                        {% else %}
+                                            {{ user.username }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ user.level }}</td>
+                                    <td>{{ user.points }}</td>
+                                    <td>
+                                        {% if user.streak > 0 %}
+                                            <span class="badge bg-success">{{ user.streak }} {{ _('days') }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">0 {{ _('days') }}</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    {{ _('No leaderboard data available yet.') }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0">{{ _('How to Earn Points') }}</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>{{ _('Daily Activities') }}</h6>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ _('Login Daily') }}
+                            <span class="badge bg-primary">5-50 {{ _('points') }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ _('Check Grades') }}
+                            <span class="badge bg-primary">5 {{ _('points') }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ _('Check Timetable') }}
+                            <span class="badge bg-primary">5 {{ _('points') }}</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>{{ _('Other Activities') }}</h6>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ _('Complete Homework') }}
+                            <span class="badge bg-primary">15 {{ _('points') }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ _('Send Messages') }}
+                            <span class="badge bg-primary">10 {{ _('points') }}</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ _('Unlock Achievements') }}
+                            <span class="badge bg-primary">20-300 {{ _('points') }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="alert alert-success mt-3">
+                <h6 class="alert-heading">{{ _('Pro Tip') }}</h6>
+                <p class="mb-0">{{ _('Maintain your login streak for bonus points! The longer your streak, the more points you earn each day.') }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,303 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('Achievements') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>{{ _('Achievements') }}</h1>
+        <a href="{{ url_for('gamification') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left"></i> {{ _('Back to Gamification') }}
+        </a>
+    </div>
+    
+    {% if achievements %}
+        <div class="row">
+            {% for achievement in achievements %}
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">{{ achievement.name }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>{{ achievement.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary">+{{ achievement.points }} {{ _('points') }}</span>
+                                <small class="text-muted">{{ _('Earned') }}: {{ achievement.date_earned }}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <h4 class="alert-heading">{{ _('No Achievements Yet') }}</h4>
+            <p>{{ _('You haven\'t unlocked any achievements yet. Keep using the app to earn achievements!') }}</p>
+            <hr>
+            <p class="mb-0">{{ _('Here are some ways to earn achievements:') }}</p>
+            <ul>
+                <li>{{ _('Login daily to build your streak') }}</li>
+                <li>{{ _('Complete homework assignments') }}</li>
+                <li>{{ _('Check your grades and timetable') }}</li>
+                <li>{{ _('Send messages to teachers and classmates') }}</li>
+            </ul>
+        </div>
+    {% endif %}
+    
+    <!-- Available Achievements -->
+    <h2 class="mt-5 mb-4">{{ _('Available Achievements') }}</h2>
+
+    <!-- Badges Section -->
+    {% if badges %}
+    <div class="mb-5">
+        <h3 class="mb-3">{{ _('Your Badges') }}</h3>
+        <div class="row">
+            {% for badge in badges %}
+                <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="card h-100 border-{% if badge.rarity == 'legendary' %}warning{% elif badge.rarity == 'epic' %}danger{% elif badge.rarity == 'rare' %}primary{% else %}secondary{% endif %}">
+                        <div class="card-header text-center bg-{% if badge.rarity == 'legendary' %}warning{% elif badge.rarity == 'epic' %}danger{% elif badge.rarity == 'rare' %}primary{% else %}secondary{% endif %} text-white">
+                            <h5 class="mb-0">{{ badge.icon }} {{ badge.name }}</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <p>{{ badge.description }}</p>
+                            <span class="badge bg-{% if badge.rarity == 'legendary' %}warning{% elif badge.rarity == 'epic' %}danger{% elif badge.rarity == 'rare' %}primary{% else %}secondary{% endif %}">
+                                {{ badge.rarity|capitalize }}
+                            </span>
+                            <p class="mt-2"><small class="text-muted">{{ _('Earned') }}: {{ badge.date_earned }}</small></p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="row">
+        <!-- Streak Achievements -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ _('Login Streak Achievements') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% set streak_achievements = [
+                            {'id': 'streak_3', 'name': 'Série de 3 jours', 'description': 'Connexion pendant 3 jours consécutifs', 'points': 20},
+                            {'id': 'streak_7', 'name': 'Guerrier Hebdomadaire', 'description': 'Connexion pendant 7 jours consécutifs', 'points': 50},
+                            {'id': 'streak_14', 'name': 'Combattant de la Quinzaine', 'description': 'Connexion pendant 14 jours consécutifs', 'points': 100},
+                            {'id': 'streak_30', 'name': 'Maître du Mois', 'description': 'Connexion pendant 30 jours consécutifs', 'points': 200},
+                            {'id': 'streak_60', 'name': 'Guerrier Saisonnier', 'description': 'Connexion pendant 60 jours consécutifs', 'points': 300},
+                            {'id': 'streak_100', 'name': 'Légende de l\'Assiduité', 'description': 'Connexion pendant 100 jours consécutifs', 'points': 500}
+                        ] %}
+
+                        {% for achievement in streak_achievements %}
+                            <div class="list-group-item list-group-item-action
+                                {% if achievements and achievements|selectattr('id', 'equalto', achievement.id)|list %}
+                                    list-group-item-success
+                                {% endif %}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ achievement.name }}</h6>
+                                    <small>+{{ achievement.points }} {{ _('points') }}</small>
+                                </div>
+                                <p class="mb-1">{{ achievement.description }}</p>
+                                {% if achievements and achievements|selectattr('id', 'equalto', achievement.id)|list %}
+                                    <small class="text-success"><i class="fas fa-check-circle"></i> {{ _('Unlocked') }}</small>
+                                {% else %}
+                                    <small class="text-muted"><i class="fas fa-lock"></i> {{ _('Locked') }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Homework Achievements -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">{{ _('Homework Achievements') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% set homework_achievements = [
+                            {'id': 'hw_5', 'name': 'Débutant des Devoirs', 'description': 'Terminer 5 devoirs', 'points': 25},
+                            {'id': 'hw_20', 'name': 'Héros des Devoirs', 'description': 'Terminer 20 devoirs', 'points': 75},
+                            {'id': 'hw_50', 'name': 'Maître des Devoirs', 'description': 'Terminer 50 devoirs', 'points': 150},
+                            {'id': 'hw_100', 'name': 'Légende des Devoirs', 'description': 'Terminer 100 devoirs', 'points': 300},
+                            {'id': 'hw_200', 'name': 'Érudit des Devoirs', 'description': 'Terminer 200 devoirs', 'points': 500}
+                        ] %}
+
+                        {% for achievement in homework_achievements %}
+                            <div class="list-group-item list-group-item-action
+                                {% if achievements and achievements|selectattr('id', 'equalto', achievement.id)|list %}
+                                    list-group-item-success
+                                {% endif %}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ achievement.name }}</h6>
+                                    <small>+{{ achievement.points }} {{ _('points') }}</small>
+                                </div>
+                                <p class="mb-1">{{ achievement.description }}</p>
+                                {% if achievements and achievements|selectattr('id', 'equalto', achievement.id)|list %}
+                                    <small class="text-success"><i class="fas fa-check-circle"></i> {{ _('Unlocked') }}</small>
+                                {% else %}
+                                    <small class="text-muted"><i class="fas fa-lock"></i> {{ _('Locked') }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grades Achievements -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">{{ _('Grades Achievements') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% set grades_achievements = [
+                            {'id': 'grades_5', 'name': 'Observateur de Notes', 'description': 'Consulter ses notes 5 fois', 'points': 20},
+                            {'id': 'grades_15', 'name': 'Analyste de Notes', 'description': 'Consulter ses notes 15 fois', 'points': 50},
+                            {'id': 'grades_30', 'name': 'Expert en Notes', 'description': 'Consulter ses notes 30 fois', 'points': 100},
+                            {'id': 'grades_50', 'name': 'Maître des Notes', 'description': 'Consulter ses notes 50 fois', 'points': 150}
+                        ] %}
+
+                        {% for achievement in grades_achievements %}
+                            <div class="list-group-item list-group-item-action
+                                {% if achievements and achievements|selectattr('id', 'equalto', achievement.id)|list %}
+                                    list-group-item-success
+                                {% endif %}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ achievement.name }}</h6>
+                                    <small>+{{ achievement.points }} {{ _('points') }}</small>
+                                </div>
+                                <p class="mb-1">{{ achievement.description }}</p>
+                                {% if achievements and achievements|selectattr('id', 'equalto', achievement.id)|list %}
+                                    <small class="text-success"><i class="fas fa-check-circle"></i> {{ _('Unlocked') }}</small>
+                                {% else %}
+                                    <small class="text-muted"><i class="fas fa-lock"></i> {{ _('Locked') }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timetable Achievements -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">{{ _('Timetable Achievements') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% set timetable_achievements = [
+                            {'id': 'timetable_5', 'name': 'Planificateur Débutant', 'description': 'Consulter son emploi du temps 5 fois', 'points': 20},
+                            {'id': 'timetable_15', 'name': 'Organisateur', 'description': 'Consulter son emploi du temps 15 fois', 'points': 50},
+                            {'id': 'timetable_30', 'name': 'Maître du Temps', 'description': 'Consulter son emploi du temps 30 fois', 'points': 100},
+                            {'id': 'timetable_50', 'name': 'Chronométreur Suprême', 'description': 'Consulter son emploi du temps 50 fois', 'points': 150}
+                        ] %}
+
+                        {% for achievement in timetable_achievements %}
+                            <div class="list-group-item list-group-item-action
+                                {% if achievements and achievements|selectattr('id', 'equalto', achievement.id)|list %}
+                                    list-group-item-success
+                                {% endif %}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ achievement.name }}</h6>
+                                    <small>+{{ achievement.points }} {{ _('points') }}</small>
+                                </div>
+                                <p class="mb-1">{{ achievement.description }}</p>
+                                {% if achievements and achievements|selectattr('id', 'equalto', achievement.id)|list %}
+                                    <small class="text-success"><i class="fas fa-check-circle"></i> {{ _('Unlocked') }}</small>
+                                {% else %}
+                                    <small class="text-muted"><i class="fas fa-lock"></i> {{ _('Locked') }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Message Achievements -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">{{ _('Message Achievements') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% set message_achievements = [
+                            {'id': 'msg_5', 'name': 'Communicateur Débutant', 'description': 'Envoyer 5 messages', 'points': 25},
+                            {'id': 'msg_15', 'name': 'Communicateur Actif', 'description': 'Envoyer 15 messages', 'points': 50},
+                            {'id': 'msg_30', 'name': 'Communicateur Expert', 'description': 'Envoyer 30 messages', 'points': 100},
+                            {'id': 'msg_50', 'name': 'Maître de la Communication', 'description': 'Envoyer 50 messages', 'points': 150}
+                        ] %}
+
+                        {% for achievement in message_achievements %}
+                            <div class="list-group-item list-group-item-action
+                                {% if achievements and achievements|selectattr('id', 'equalto', achievement.id)|list %}
+                                    list-group-item-success
+                                {% endif %}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ achievement.name }}</h6>
+                                    <small>+{{ achievement.points }} {{ _('points') }}</small>
+                                </div>
+                                <p class="mb-1">{{ achievement.description }}</p>
+                                {% if achievements and achievements|selectattr('id', 'equalto', achievement.id)|list %}
+                                    <small class="text-success"><i class="fas fa-check-circle"></i> {{ _('Unlocked') }}</small>
+                                {% else %}
+                                    <small class="text-muted"><i class="fas fa-lock"></i> {{ _('Locked') }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Study Plan Achievements -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-purple text-white" style="background-color: #6f42c1;">
+                    <h5 class="mb-0">{{ _('Study Plan Achievements') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% set study_plan_achievements = [
+                            {'id': 'plan_create_3', 'name': 'Planificateur Débutant', 'description': 'Créer 3 plans d\'étude', 'points': 30},
+                            {'id': 'plan_create_10', 'name': 'Planificateur Expert', 'description': 'Créer 10 plans d\'étude', 'points': 75},
+                            {'id': 'plan_complete_3', 'name': 'Étudiant Discipliné', 'description': 'Compléter 3 plans d\'étude', 'points': 50},
+                            {'id': 'plan_complete_10', 'name': 'Maître de l\'Étude', 'description': 'Compléter 10 plans d\'étude', 'points': 150}
+                        ] %}
+
+                        {% for achievement in study_plan_achievements %}
+                            <div class="list-group-item list-group-item-action
+                                {% if achievements and achievements|selectattr('id', 'equalto', achievement.id)|list %}
+                                    list-group-item-success
+                                {% endif %}">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h6 class="mb-1">{{ achievement.name }}</h6>
+                                    <small>+{{ achievement.points }} {{ _('points') }}</small>
+                                </div>
+                                <p class="mb-1">{{ achievement.description }}</p>
+                                {% if achievements and achievements|selectattr('id', 'equalto', achievement.id)|list %}
+                                    <small class="text-success"><i class="fas fa-check-circle"></i> {{ _('Unlocked') }}</small>
+                                {% else %}
+                                    <small class="text-muted"><i class="fas fa-lock"></i> {{ _('Locked') }}</small>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,279 @@
+/* Dark Mode CSS */
+:root {
+    --text-size-factor: 1;
+    --font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --line-spacing: 1.5;
+    
+    /* Light mode colors */
+    --bg-color: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-color: #212529;
+    --text-muted: #6c757d;
+    --border-color: #dee2e6;
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --info-color: #0dcaf0;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #f8f9fa;
+    --dark-color: #212529;
+    
+    /* Transition settings */
+    --transition-speed: 0.3s;
+}
+
+/* Apply font size scaling to all text elements */
+body {
+    font-size: calc(1rem * var(--text-size-factor));
+    font-family: var(--font-family);
+    line-height: var(--line-spacing);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color var(--transition-speed), color var(--transition-speed);
+}
+
+/* Dark mode colors */
+body.dark-mode {
+    --bg-color: #121212;
+    --card-bg: #1e1e1e;
+    --text-color: #e0e0e0;
+    --text-muted: #adb5bd;
+    --border-color: #343a40;
+    --primary-color: #3d8bfd;
+    --secondary-color: #adb5bd;
+    --success-color: #28a745;
+    --info-color: #17a2b8;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --light-color: #343a40;
+    --dark-color: #f8f9fa;
+}
+
+/* High contrast mode */
+body.high-contrast {
+    --text-color: #ffffff;
+    --bg-color: #000000;
+    --card-bg: #121212;
+    --text-muted: #ffffff;
+    --border-color: #ffffff;
+    --primary-color: #ffff00;
+    --secondary-color: #ffffff;
+    --success-color: #00ff00;
+    --info-color: #00ffff;
+    --warning-color: #ffff00;
+    --danger-color: #ff0000;
+}
+
+/* Apply dark mode to common elements */
+.card {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    transition: background-color var(--transition-speed), border-color var(--transition-speed);
+}
+
+.card-header, .card-footer {
+    background-color: rgba(0, 0, 0, 0.05);
+    border-color: var(--border-color);
+}
+
+body.dark-mode .card-header, body.dark-mode .card-footer {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.table {
+    color: var(--text-color);
+    border-color: var(--border-color);
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+body.dark-mode .table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.075);
+}
+
+.modal-content {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+.modal-header, .modal-footer {
+    border-color: var(--border-color);
+}
+
+.form-control, .form-select {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: var(--card-bg);
+    color: var(--text-color);
+}
+
+.input-group-text {
+    background-color: var(--light-color);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.dropdown-menu {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+}
+
+.dropdown-item {
+    color: var(--text-color);
+}
+
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+body.dark-mode .dropdown-item:hover, body.dark-mode .dropdown-item:focus {
+    background-color: rgba(255, 255, 255, 0.075);
+}
+
+.list-group-item {
+    background-color: var(--card-bg);
+    border-color: var(--border-color);
+    color: var(--text-color);
+}
+
+.text-muted {
+    color: var(--text-muted) !important;
+}
+
+.border {
+    border-color: var(--border-color) !important;
+}
+
+/* Reduced motion */
+body.reduced-motion * {
+    transition: none !important;
+    animation: none !important;
+}
+
+body.reduced-motion .fade-in {
+    opacity: 1 !important;
+    animation: none !important;
+}
+
+/* Enhanced screen reader support */
+body.enhanced-a11y .sr-only-enhanced {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+body.enhanced-a11y .btn:focus,
+body.enhanced-a11y .form-control:focus,
+body.enhanced-a11y .form-select:focus,
+body.enhanced-a11y a:focus {
+    outline: 3px solid var(--primary-color) !important;
+    outline-offset: 2px !important;
+}
+
+/* Focus indicators for keyboard navigation */
+body:not(.using-mouse) *:focus {
+    outline: 3px solid var(--primary-color) !important;
+    outline-offset: 2px !important;
+}
+
+/* Keyboard shortcuts helper */
+.keyboard-shortcuts-helper {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1050;
+    max-width: 300px;
+}
+
+body.dark-mode .keyboard-shortcuts-helper {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Accessibility button */
+.accessibility-toggle {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 1050;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.3s;
+}
+
+.accessibility-toggle:hover {
+    background-color: #0b5ed7;
+}
+
+body.dark-mode .accessibility-toggle {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+/* OpenDyslexic font */
+@font-face {
+    font-family: 'OpenDyslexic';
+    src: url('https://cdn.jsdelivr.net/npm/open-dyslexic@1.0.3/open-dyslexic-regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Keyboard shortcut styling */
+kbd {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 3px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+    color: var(--text-color);
+    display: inline-block;
+    font-size: 0.85em;
+    font-weight: 700;
+    line-height: 1;
+    padding: 2px 4px;
+    white-space: nowrap;
+}
+
+body.dark-mode kbd {
+    box-shadow: 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
+/* Print styles */
+@media print {
+    body {
+        background-color: white !important;
+        color: black !important;
+    }
+    
+    .card, .modal-content, .list-group-item {
+        background-color: white !important;
+        border-color: #ddd !important;
+    }
+    
+    .no-print {
+        display: none !important;
+    }
+}

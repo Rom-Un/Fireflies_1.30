@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Discussions{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ _('Discussions') }}</h1>
+    
+    <div class="d-flex justify-content-between mb-4">
+        <div>
+            <a href="{{ url_for('new_discussion') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> {{ _('New Discussion') }}
+            </a>
+        </div>
+        <div>
+            <a href="{{ url_for('discussions', unread='true' if not show_only_unread else 'false') }}" class="btn btn-outline-secondary">
+                {% if show_only_unread %}
+                    <i class="fas fa-envelope-open"></i> {{ _('Show All') }}
+                {% else %}
+                    <i class="fas fa-envelope"></i> {{ _('Show Only Unread') }}
+                {% endif %}
+            </a>
+        </div>
+    </div>
+    
+    {% if discussions %}
+        <div class="list-group">
+            {% for discussion in discussions %}
+                <a href="{{ url_for('discussion', discussion_id=discussion.id) }}" class="list-group-item list-group-item-action {% if discussion.unread %}fw-bold{% endif %}">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h5 class="mb-1">
+                            {% if discussion.unread %}
+                                <i class="fas fa-envelope text-primary me-2"></i>
+                            {% else %}
+                                <i class="fas fa-envelope-open text-secondary me-2"></i>
+                            {% endif %}
+                            {{ discussion.subject }}
+                        </h5>
+                        <small>{{ discussion.date }}</small>
+                    </div>
+                    <p class="mb-1">{{ _('From') }}: {{ discussion.author }}</p>
+                    {% if discussion.participants %}
+                        <small>
+                            <i class="fas fa-users me-1"></i>
+                            {{ _('Participants') }}: {{ discussion.participants|length if discussion.participants is iterable and discussion.participants is not string else discussion.participants.split(',')|length }}
+                        </small>
+                    {% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            {% if show_only_unread %}
+                {{ _('No unread discussions found.') }}
+            {% else %}
+                {{ _('No discussions found.') }}
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+
+{% block title %}Accessibility Settings - Fireflies{% endblock %}
+
+{% block content %}
+<div class="container fade-in">
+    <h1 class="page-title mb-4">{{ _('Accessibility Settings') }}</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Display Settings') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6>{{ _('Theme') }}</h6>
+                        <div class="d-flex mt-3">
+                            <div class="form-check form-switch me-4">
+                                <input class="form-check-input" type="checkbox" id="darkModeToggle" {% if user_settings.dark_mode %}checked{% endif %}>
+                                <label class="form-check-label" for="darkModeToggle">{{ _('Dark Mode') }}</label>
+                            </div>
+                            <div class="form-check form-switch me-4">
+                                <input class="form-check-input" type="checkbox" id="highContrastToggle" {% if user_settings.high_contrast %}checked{% endif %}>
+                                <label class="form-check-label" for="highContrastToggle">{{ _('High Contrast') }}</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="reducedMotionToggle" {% if user_settings.reduced_motion %}checked{% endif %}>
+                                <label class="form-check-label" for="reducedMotionToggle">{{ _('Reduced Motion') }}</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>{{ _('Text Size') }}</h6>
+                        <div class="d-flex align-items-center mt-3">
+                            <span class="me-2">A</span>
+                            <input type="range" class="form-range" min="80" max="150" step="10" id="textSizeRange" value="{{ user_settings.text_size|default(100) }}">
+                            <span class="ms-2">A</span>
+                            <span class="ms-3" id="textSizeValue">{{ user_settings.text_size|default(100) }}%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>{{ _('Font Family') }}</h6>
+                        <select class="form-select" id="fontFamilySelect" style="max-width: 300px;">
+                            <option value="system-ui" {% if user_settings.font_family == 'system-ui' %}selected{% endif %}>{{ _('System Default') }}</option>
+                            <option value="'Open Sans', sans-serif" {% if user_settings.font_family == "'Open Sans', sans-serif" %}selected{% endif %}>Open Sans</option>
+                            <option value="'Roboto', sans-serif" {% if user_settings.font_family == "'Roboto', sans-serif" %}selected{% endif %}>Roboto</option>
+                            <option value="'Lato', sans-serif" {% if user_settings.font_family == "'Lato', sans-serif" %}selected{% endif %}>Lato</option>
+                            <option value="'OpenDyslexic', sans-serif" {% if user_settings.font_family == "'OpenDyslexic', sans-serif" %}selected{% endif %}>OpenDyslexic</option>
+                        </select>
+                        <div class="form-text">{{ _('OpenDyslexic is a font designed to help readers with dyslexia.') }}</div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>{{ _('Line Spacing') }}</h6>
+                        <div class="d-flex align-items-center mt-3">
+                            <span class="me-2">{{ _('Compact') }}</span>
+                            <input type="range" class="form-range" min="1" max="2" step="0.1" id="lineSpacingRange" value="{{ user_settings.line_spacing|default(1.5) }}">
+                            <span class="ms-2">{{ _('Spacious') }}</span>
+                            <span class="ms-3" id="lineSpacingValue">{{ user_settings.line_spacing|default(1.5) }}x</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Keyboard Shortcuts') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="keyboardShortcutsToggle" {% if user_settings.keyboard_shortcuts %}checked{% endif %}>
+                        <label class="form-check-label" for="keyboardShortcutsToggle">{{ _('Enable Keyboard Shortcuts') }}</label>
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{{ _('Shortcut') }}</th>
+                                    <th>{{ _('Action') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><kbd>Alt</kbd> + <kbd>H</kbd></td>
+                                    <td>{{ _('Go to Home/Dashboard') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><kbd>Alt</kbd> + <kbd>F</kbd></td>
+                                    <td>{{ _('Go to Flashcards') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><kbd>Alt</kbd> + <kbd>G</kbd></td>
+                                    <td>{{ _('Go to Grades') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><kbd>Alt</kbd> + <kbd>T</kbd></td>
+                                    <td>{{ _('Go to Timetable') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><kbd>Alt</kbd> + <kbd>D</kbd></td>
+                                    <td>{{ _('Go to Discussions') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><kbd>Alt</kbd> + <kbd>S</kbd></td>
+                                    <td>{{ _('Go to Settings') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><kbd>/</kbd></td>
+                                    <td>{{ _('Focus Search') }}</td>
+                                </tr>
+                                <tr>
+                                    <td><kbd>Esc</kbd></td>
+                                    <td>{{ _('Close Modal/Popup') }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Screen Reader Support') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="enhancedA11yToggle" {% if user_settings.enhanced_a11y %}checked{% endif %}>
+                        <label class="form-check-label" for="enhancedA11yToggle">{{ _('Enhanced Screen Reader Support') }}</label>
+                    </div>
+                    <p class="text-muted">{{ _('Enabling this option adds additional ARIA labels and improves navigation for screen readers.') }}</p>
+                    
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">{{ _('Accessibility Statement') }}</h6>
+                        <p class="mb-0">{{ _('Fireflies is committed to ensuring digital accessibility for people with disabilities. We are continually improving the user experience for everyone, and applying the relevant accessibility standards.') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Dark mode toggle
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    darkModeToggle.addEventListener('change', function() {
+        updateAccessibilitySettings('dark_mode', this.checked);
+        toggleDarkMode(this.checked);
+    });
+    
+    // High contrast toggle
+    const highContrastToggle = document.getElementById('highContrastToggle');
+    highContrastToggle.addEventListener('change', function() {
+        updateAccessibilitySettings('high_contrast', this.checked);
+        toggleHighContrast(this.checked);
+    });
+    
+    // Reduced motion toggle
+    const reducedMotionToggle = document.getElementById('reducedMotionToggle');
+    reducedMotionToggle.addEventListener('change', function() {
+        updateAccessibilitySettings('reduced_motion', this.checked);
+        toggleReducedMotion(this.checked);
+    });
+    
+    // Text size slider
+    const textSizeRange = document.getElementById('textSizeRange');
+    const textSizeValue = document.getElementById('textSizeValue');
+    textSizeRange.addEventListener('input', function() {
+        textSizeValue.textContent = this.value + '%';
+        updateTextSize(this.value);
+    });
+    textSizeRange.addEventListener('change', function() {
+        updateAccessibilitySettings('text_size', parseInt(this.value));
+    });
+    
+    // Font family select
+    const fontFamilySelect = document.getElementById('fontFamilySelect');
+    fontFamilySelect.addEventListener('change', function() {
+        updateFontFamily(this.value);
+        updateAccessibilitySettings('font_family', this.value);
+    });
+    
+    // Line spacing slider
+    const lineSpacingRange = document.getElementById('lineSpacingRange');
+    const lineSpacingValue = document.getElementById('lineSpacingValue');
+    lineSpacingRange.addEventListener('input', function() {
+        lineSpacingValue.textContent = this.value + 'x';
+        updateLineSpacing(this.value);
+    });
+    lineSpacingRange.addEventListener('change', function() {
+        updateAccessibilitySettings('line_spacing', parseFloat(this.value));
+    });
+    
+    // Keyboard shortcuts toggle
+    const keyboardShortcutsToggle = document.getElementById('keyboardShortcutsToggle');
+    keyboardShortcutsToggle.addEventListener('change', function() {
+        updateAccessibilitySettings('keyboard_shortcuts', this.checked);
+        toggleKeyboardShortcuts(this.checked);
+    });
+    
+    // Enhanced screen reader support toggle
+    const enhancedA11yToggle = document.getElementById('enhancedA11yToggle');
+    enhancedA11yToggle.addEventListener('change', function() {
+        updateAccessibilitySettings('enhanced_a11y', this.checked);
+        toggleEnhancedA11y(this.checked);
+    });
+    
+    // Function to update accessibility settings via API
+    function updateAccessibilitySettings(setting, value) {
+        fetch('/api/settings/accessibility', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                setting: setting,
+                value: value
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                console.error('Error updating settings:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    
+    // Function to toggle dark mode
+    function toggleDarkMode(enabled) {
+        if (enabled) {
+            document.body.classList.add('dark-mode');
+        } else {
+            document.body.classList.remove('dark-mode');
+        }
+    }
+    
+    // Function to toggle high contrast
+    function toggleHighContrast(enabled) {
+        if (enabled) {
+            document.body.classList.add('high-contrast');
+        } else {
+            document.body.classList.remove('high-contrast');
+        }
+    }
+    
+    // Function to toggle reduced motion
+    function toggleReducedMotion(enabled) {
+        if (enabled) {
+            document.body.classList.add('reduced-motion');
+        } else {
+            document.body.classList.remove('reduced-motion');
+        }
+    }
+    
+    // Function to update text size
+    function updateTextSize(size) {
+        document.documentElement.style.setProperty('--text-size-factor', size / 100);
+    }
+    
+    // Function to update font family
+    function updateFontFamily(fontFamily) {
+        document.documentElement.style.setProperty('--font-family', fontFamily);
+    }
+    
+    // Function to update line spacing
+    function updateLineSpacing(spacing) {
+        document.documentElement.style.setProperty('--line-spacing', spacing);
+    }
+    
+    // Function to toggle keyboard shortcuts
+    function toggleKeyboardShortcuts(enabled) {
+        // This will be handled by the main app.js
+        window.keyboardShortcutsEnabled = enabled;
+    }
+    
+    // Function to toggle enhanced screen reader support
+    function toggleEnhancedA11y(enabled) {
+        if (enabled) {
+            document.body.classList.add('enhanced-a11y');
+        } else {
+            document.body.classList.remove('enhanced-a11y');
+        }
+    }
+    
+    // Initialize settings based on current values
+    toggleDarkMode(darkModeToggle.checked);
+    toggleHighContrast(highContrastToggle.checked);
+    toggleReducedMotion(reducedMotionToggle.checked);
+    updateTextSize(textSizeRange.value);
+    updateFontFamily(fontFamilySelect.value);
+    updateLineSpacing(lineSpacingRange.value);
+    toggleKeyboardShortcuts(keyboardShortcutsToggle.checked);
+    toggleEnhancedA11y(enhancedA11yToggle.checked);
+});
+</script>
+{% endblock %}

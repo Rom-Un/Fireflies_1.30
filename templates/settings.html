@@ -1,0 +1,239 @@
+{% extends "base.html" %}
+
+{% block title %}Paramètres - Fireflies{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="page-title">Paramètres</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-palette me-2"></i>Apparence
+            </div>
+            <div class="card-body">
+                <form id="theme-form">
+                    <div class="mb-4">
+                        <label for="theme-selector" class="form-label">Thème</label>
+                        <select class="form-select" id="theme-selector" onchange="changeTheme(this.value)">
+                            <option value="blue" {% if settings.theme == 'blue' %}selected{% endif %}>Bleu (Par défaut)</option>
+                            <option value="green" {% if settings.theme == 'green' %}selected{% endif %}>Vert</option>
+                            <option value="red" {% if settings.theme == 'red' %}selected{% endif %}>Rouge</option>
+                            <option value="purple" {% if settings.theme == 'purple' %}selected{% endif %}>Violet</option>
+                            <option value="dark" {% if settings.theme == 'dark' %}selected{% endif %}>Sombre</option>
+                        </select>
+                        <div class="form-text">Choisissez un thème de couleur pour l'application.</div>
+                    </div>
+
+                    <div class="theme-preview mt-4">
+                        <h5>Aperçu du thème</h5>
+                        <div class="row mt-3">
+                            <div class="col-md-12">
+                                <div class="d-flex flex-wrap gap-2">
+                                    <div class="color-sample primary-color" title="Couleur principale"></div>
+                                    <div class="color-sample secondary-color" title="Couleur secondaire"></div>
+                                    <div class="color-sample accent-color" title="Couleur d'accent"></div>
+                                    <div class="color-sample success-color" title="Couleur de succès"></div>
+                                    <div class="color-sample warning-color" title="Couleur d'avertissement"></div>
+                                    <div class="color-sample info-color" title="Couleur d'information"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-language me-2"></i>Langue
+            </div>
+            <div class="card-body">
+                <form id="language-form">
+                    <div class="mb-4">
+                        <label for="language-selector" class="form-label">Langue</label>
+                        <select class="form-select" id="language-selector" onchange="setLanguage(this.value)">
+                            <option value="french" {% if settings.language == 'french' %}selected{% endif %}>Français</option>
+                            <option value="english" {% if settings.language == 'english' %}selected{% endif %}>English</option>
+                        </select>
+                        <div class="form-text">Choisissez votre langue préférée.</div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Les changements de langue prendront effet après le rafraîchissement de la page.
+                    </div>
+
+                    <button type="button" class="btn btn-primary" onclick="applyLanguage()">
+                        <i class="fas fa-check me-2"></i>Appliquer la langue
+                    </button>
+                </form>
+            </div>
+        </div>
+
+
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-universal-access me-2"></i>Accessibilité
+            </div>
+            <div class="card-body">
+                <p>Personnalisez les paramètres d'accessibilité pour améliorer votre expérience.</p>
+                <a href="{{ url_for('accessibility') }}" class="btn btn-primary">
+                    <i class="fas fa-cog me-2"></i>Paramètres d'accessibilité
+                </a>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="fas fa-save me-2"></i>Enregistrer les paramètres
+            </div>
+            <div class="card-body">
+                <p>Vos paramètres sont automatiquement enregistrés dans votre navigateur.</p>
+                <button type="button" class="btn btn-danger" onclick="resetSettings()">
+                    <i class="fas fa-undo me-2"></i>Réinitialiser aux valeurs par défaut
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+    .color-sample {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .color-sample:hover {
+        transform: scale(1.1);
+    }
+    
+    .primary-color {
+        background-color: var(--primary-color);
+    }
+    
+    .secondary-color {
+        background-color: var(--secondary-color);
+    }
+    
+    .accent-color {
+        background-color: var(--accent-color);
+    }
+    
+    .success-color {
+        background-color: var(--success-color);
+    }
+    
+    .warning-color {
+        background-color: var(--warning-color);
+    }
+    
+    .info-color {
+        background-color: var(--info-color);
+    }
+    
+    .theme-preview {
+        padding: 15px;
+        border-radius: 10px;
+        background-color: rgba(0,0,0,0.03);
+    }
+</style>
+
+<script>
+    // Function to change theme
+    function changeTheme(themeName) {
+        // Apply theme locally
+        setTheme(themeName);
+
+        // Send request to server to save theme
+        fetch('/set_theme', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ theme: themeName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (!data.success) {
+                alert('Échec de l\'enregistrement du thème : ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue lors de l\'enregistrement du thème');
+        });
+    }
+
+    // Function to apply language change
+    function applyLanguage() {
+        const language = document.getElementById('language-selector').value;
+        // Send request to server to change language
+        fetch('/set_language', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ language: language })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Reload the page to apply language changes
+                window.location.reload();
+            } else {
+                alert('Échec du changement de langue : ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue lors du changement de langue');
+        });
+    }
+
+    // Function to reset settings to defaults
+    function resetSettings() {
+        if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les paramètres aux valeurs par défaut ?')) {
+            // Reset theme locally
+            setTheme('blue');
+
+            // Reset theme on server
+            fetch('/set_theme', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ theme: 'blue' })
+            });
+
+            // Reset language locally
+            setLanguage('french');
+
+            // Reset language on server
+            fetch('/set_language', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ language: 'french' })
+            })
+            .then(() => {
+                // Reload the page to apply all changes
+                window.location.reload();
+            });
+        }
+    }
+</script>
+{% endblock %}

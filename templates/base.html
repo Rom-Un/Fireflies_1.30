@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Fireflies{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dark_mode.css') }}">
+    <style>
+        :root {
+            /* Default theme (Blue) */
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --info-color: #4361ee;
+            --background-color: #f5f7fb;
+            --card-bg-color: #ffffff;
+            --text-color: #212529;
+            --text-muted: #6c757d;
+            
+            /* Accessibility variables */
+            --font-size-multiplier: 1;
+            --line-spacing-multiplier: 1.3;
+        }
+
+        /* Green Theme */
+        .theme-green {
+            --primary-color: #2e8b57;
+            --secondary-color: #228b22;
+            --accent-color: #3cb371;
+            --success-color: #00cc66;
+            --warning-color: #ff6b6b;
+            --info-color: #20b2aa;
+            --background-color: #f0f7f0;
+        }
+
+        /* Red Theme */
+        .theme-red {
+            --primary-color: #d32f2f;
+            --secondary-color: #b71c1c;
+            --accent-color: #f44336;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --info-color: #e91e63;
+            --background-color: #fff5f5;
+        }
+
+        /* Purple Theme */
+        .theme-purple {
+            --primary-color: #673ab7;
+            --secondary-color: #512da8;
+            --accent-color: #9c27b0;
+            --success-color: #8bc34a;
+            --warning-color: #ff5722;
+            --info-color: #7e57c2;
+            --background-color: #f5f0fa;
+        }
+
+        /* Dark Theme */
+        .theme-dark {
+            --primary-color: #3949ab;
+            --secondary-color: #303f9f;
+            --accent-color: #5c6bc0;
+            --light-color: #424242;
+            --dark-color: #212121;
+            --success-color: #43a047;
+            --warning-color: #fb8c00;
+            --info-color: #039be5;
+            --background-color: #121212;
+            --card-bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --text-muted: #9e9e9e;
+        }
+
+        body {
+            padding-top: 0;
+            padding-bottom: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: all 0.3s ease;
+            font-size: calc(1rem * var(--font-size-multiplier));
+            line-height: calc(1.5 * var(--line-spacing-multiplier));
+        }
+        
+        /* Accessibility Styles */
+        .high-contrast {
+            --text-color: #000000;
+            --background-color: #ffffff;
+            --card-bg-color: #ffffff;
+            --text-muted: #000000;
+            --primary-color: #000000;
+            --secondary-color: #000000;
+            --accent-color: #000000;
+            --light-color: #ffffff;
+            --dark-color: #000000;
+            --success-color: #006600;
+            --warning-color: #cc0000;
+            --info-color: #000099;
+        }
+        
+        .high-contrast .card,
+        .high-contrast .btn,
+        .high-contrast .alert,
+        .high-contrast .nav-link,
+        .high-contrast .dropdown-item {
+            border: 2px solid #000000 !important;
+        }
+        
+        .dyslexia-font {
+            font-family: 'OpenDyslexic', 'Comic Sans MS', cursive, sans-serif;
+        }
+        
+        .reduce-animations * {
+            transition: none !important;
+            animation: none !important;
+        }
+        
+        .focus-mode .sidebar-menu .nav-item:not(.active),
+        .focus-mode .navbar-nav .nav-item:not(.active),
+        .focus-mode .footer,
+        .focus-mode .card:not(:focus-within):not(:hover) {
+            opacity: 0.7;
+        }
+        
+        .focus-mode .card:focus-within,
+        .focus-mode .card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            opacity: 1;
+        }
+
+        .navbar {
+            margin-bottom: 30px;
+            background-color: var(--primary-color) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 12px 0;
+        }
+
+        .navbar-brand, .navbar-nav .nav-link {
+            color: white !important;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            font-size: 1.5rem;
+            position: relative;
+        }
+
+        .navbar-brand i {
+            animation: firefly-pulse 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes firefly-pulse {
+            0% {
+                opacity: 0.8;
+                text-shadow: 0 0 3px rgba(255, 255, 255, 0.5);
+            }
+            100% {
+                opacity: 1;
+                text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+            }
+        }
+
+        .navbar-nav .nav-link {
+            font-weight: 500;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: rgba(255, 255, 255, 0.8) !important;
+            transform: translateY(-2px);
+        }
+
+        .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.7%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        .flash-messages {
+            margin-top: 20px;
+        }
+
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: none;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+            margin-bottom: 20px;
+            background-color: var(--card-bg-color);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+
+        .btn-outline-primary {
+            color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .btn-outline-primary:hover {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        .table {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .table thead th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .badge {
+            padding: 6px 10px;
+            font-weight: 500;
+        }
+
+        .page-title {
+            color: var(--dark-color);
+            font-weight: 700;
+            margin-bottom: 25px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .page-title:after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 4px;
+            background-color: var(--primary-color);
+            bottom: -10px;
+            left: 0;
+            border-radius: 2px;
+        }
+
+        .nav-icon {
+            margin-right: 8px;
+        }
+
+        .footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            text-align: center;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        /* Custom styles for timetable */
+        .timetable-card {
+            border-left: 5px solid var(--primary-color);
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .timetable-card:hover {
+            transform: translateX(5px);
+        }
+
+        .timetable-subject {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .timetable-time {
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+
+        .timetable-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        /* Week view styles */
+        .nav-tabs .nav-link {
+            color: var(--dark-color);
+            border-radius: 0.5rem 0.5rem 0 0;
+            padding: 0.5rem 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--primary-color);
+            border-bottom: 3px solid var(--primary-color);
+            font-weight: 600;
+        }
+
+        .nav-tabs .nav-link:hover:not(.active) {
+            background-color: rgba(0, 0, 0, 0.03);
+            border-color: transparent;
+        }
+
+        .tab-content {
+            padding: 1.5rem 0;
+        }
+
+        .border-primary {
+            border: 2px solid var(--primary-color) !important;
+        }
+
+        /* Custom styles for login form */
+        .login-container {
+            max-width: 500px;
+            margin: 50px auto;
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-logo i {
+            font-size: 4rem;
+            color: var(--primary-color);
+            animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        /* Firefly glow animation */
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 2px #fff, 0 0 5px var(--primary-color);
+            }
+            to {
+                text-shadow: 0 0 5px #fff, 0 0 10px var(--primary-color);
+            }
+        }
+
+        .login-title {
+            text-align: center;
+            margin-bottom: 30px;
+            color: var(--dark-color);
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        .container {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="{% if session.get('settings', {}).get('theme') and session.get('settings', {}).get('theme') != 'blue' %}theme-{{ session.get('settings', {}).get('theme') }}{% endif %}">
+    <div class="container-fluid px-0">
+        {% if session.logged_in %}
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                    <i class="fas fa-fire nav-icon"></i>Fireflies
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('dashboard') }}">
+                                <i class="fas fa-home nav-icon"></i>Menu
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('homework') }}">
+                                <i class="fas fa-book nav-icon"></i>Devoirs
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('grades') }}">
+                                <i class="fas fa-chart-line nav-icon"></i>Notes
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('timetable') }}">
+                                <i class="fas fa-calendar-alt nav-icon"></i>Planning
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('discussions') }}">
+                                <i class="fas fa-comments nav-icon"></i>Discussions
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('flashcards') }}">
+                                <i class="fas fa-graduation-cap nav-icon"></i>{{ _('Flashcards') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('gamification') }}">
+                                <i class="fas fa-trophy nav-icon"></i>{{ _('Gamification') }}
+                            </a>
+                        </li>
+
+                    </ul>
+                    <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('settings') }}">
+                                <i class="fas fa-cog nav-icon"></i>Paramètres
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}">
+                                <i class="fas fa-sign-out-alt nav-icon"></i>Déconnexion
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        {% endif %}
+
+        <div class="container">
+            <div class="flash-messages">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category if category != 'error' else 'danger' }} alert-dismissible fade show">
+                                {% if category == 'success' %}
+                                    <i class="fas fa-check-circle me-2"></i>
+                                {% elif category == 'error' or category == 'danger' %}
+                                    <i class="fas fa-exclamation-circle me-2"></i>
+                                {% elif category == 'info' %}
+                                    <i class="fas fa-info-circle me-2"></i>
+                                {% elif category == 'warning' %}
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                {% endif %}
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+            {% block content %}{% endblock %}
+
+            <footer class="footer">
+                <div class="container">
+                    <p>Fireflies &copy; {{ now.year }} - Créé avec <i class="fas fa-heart text-danger"></i> en utilisant pronotepy</p>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/accessibility.js') }}"></script>
+    <script>
+        // Fonction pour définir le thème
+        function setTheme(themeName) {
+            // Supprimer toutes les classes de thème
+            document.body.classList.remove('theme-blue', 'theme-green', 'theme-red', 'theme-purple', 'theme-dark');
+
+            // Ajouter la classe du thème sélectionné s'il ne s'agit pas du bleu par défaut
+            if (themeName !== 'blue') {
+                document.body.classList.add('theme-' + themeName);
+            }
+
+            // Enregistrer la préférence de thème dans localStorage
+            localStorage.setItem('theme', themeName);
+        }
+
+        // Fonction pour définir la langue
+        function setLanguage(lang) {
+            // Enregistrer la préférence de langue dans localStorage
+            localStorage.setItem('language', lang);
+        }
+
+        // Initialiser le thème à partir de localStorage
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'blue';
+            setTheme(savedTheme);
+
+            // Définir le sélecteur de thème s'il existe
+            const themeSelector = document.getElementById('theme-selector');
+            if (themeSelector) {
+                themeSelector.value = savedTheme;
+            }
+
+            // Définir le sélecteur de langue s'il existe
+            const langSelector = document.getElementById('language-selector');
+            if (langSelector) {
+                const savedLanguage = localStorage.getItem('language') || 'french';
+                langSelector.value = savedLanguage;
+            }
+        });
+    </script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

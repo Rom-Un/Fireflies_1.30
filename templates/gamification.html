@@ -1,0 +1,976 @@
+{% extends "base.html" %}
+
+{% block title %}Gamification & Study Analytics{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="mb-4">{{ _('Gamification & Study Analytics') }}</h1>
+    
+    <!-- Tab navigation -->
+    <ul class="nav nav-tabs mb-4" id="gamificationTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="gamification-tab" data-bs-toggle="tab" data-bs-target="#gamification-content" 
+                    type="button" role="tab" aria-controls="gamification-content" aria-selected="true">
+                <i class="fas fa-trophy me-2"></i>{{ _('Gamification') }}
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics-content" 
+                    type="button" role="tab" aria-controls="analytics-content" aria-selected="false">
+                <i class="fas fa-brain me-2"></i>{{ _('Study Analytics') }}
+            </button>
+        </li>
+    </ul>
+    
+    <!-- Tab content -->
+    <div class="tab-content" id="gamificationTabsContent">
+        <!-- Gamification Tab -->
+        <div class="tab-pane fade show active" id="gamification-content" role="tabpanel" aria-labelledby="gamification-tab">
+    
+    <div class="row">
+        <!-- User Stats Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ _('Vos Statistiques') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div>
+                            <h2 class="mb-0">{{ _('Niveau') }} {{ stats.level }} <span class="badge bg-warning">{{ stats.points }} {{ _('points') }}</span></h2>
+                            <p class="text-muted">{{ stats.xp }} XP / {{ stats.next_level_xp }} XP</p>
+                        </div>
+                        <div class="text-center">
+                            <div class="display-4 mb-0">
+                                <i class="fas fa-trophy text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="progress mb-4" style="height: 20px;">
+                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ stats.xp_progress }}%;"
+                             aria-valuenow="{{ stats.xp_progress }}" aria-valuemin="0" aria-valuemax="100">
+                            {{ stats.xp }} / {{ stats.next_level_xp }} XP
+                        </div>
+                    </div>
+
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="display-6 mb-0">{{ stats.streak.current }} {% if stats.streak.flame_emoji %}<span class="text-danger">{{ stats.streak.flame_emoji }}</span>{% endif %}</div>
+                            <p class="text-muted">{{ _('Série de jours') }} {% if stats.streak.multiplier > 1 %}<span class="badge bg-success">x{{ stats.streak.multiplier }}</span>{% endif %}</p>
+                        </div>
+                        <div class="col-6">
+                            <div class="display-6 mb-0">{{ stats.streak.max }}</div>
+                            <p class="text-muted">{{ _('Série maximale') }}</p>
+                        </div>
+                    </div>
+
+                    {% if stats.boosters %}
+                    <div class="mt-4">
+                        <h5>{{ _('Boosters actifs') }}</h5>
+                        <div class="list-group">
+                            {% for booster in stats.boosters %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ booster.name }}</h6>
+                                        <small class="text-muted">{{ _('Expire') }}: {{ booster.expires|truncate(16, True, '') }}</small>
+                                    </div>
+                                    <p class="mb-1">{{ booster.description }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Achievements Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ _('Succès') }}</h5>
+                        <a href="{{ url_for('achievements') }}" class="btn btn-sm btn-light">{{ _('Voir tout') }}</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>{{ _('Vous avez débloqué') }} <strong>{{ stats.achievements.total }}</strong> {{ _('succès') }}</p>
+
+                    {% if stats.achievements.recent %}
+                        <h6 class="mt-3">{{ _('Succès récents') }}:</h6>
+                        <div class="list-group">
+                            {% for achievement in stats.achievements.recent %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ achievement.name }}</h6>
+                                        <small>+{{ achievement.points }} {{ _('points') }}</small>
+                                    </div>
+                                    <p class="mb-1">{{ achievement.description }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mt-3">
+                            {{ _('Aucun succès débloqué pour l\'instant. Continuez à utiliser l\'application pour gagner des succès !') }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Badges Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ _('Badges') }}</h5>
+                        <a href="{{ url_for('badges') }}" class="btn btn-sm btn-dark">{{ _('Voir tout') }}</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>{{ _('Vous avez obtenu') }} <strong>{{ stats.badges.total }}</strong> {{ _('badges') }}</p>
+
+                    {% if stats.badges.recent %}
+                        <h6 class="mt-3">{{ _('Badges récents') }}:</h6>
+                        <div class="list-group">
+                            {% for badge in stats.badges.recent %}
+                                <div class="list-group-item list-group-item-action border-{% if badge.rarity == 'legendary' %}warning{% elif badge.rarity == 'epic' %}danger{% elif badge.rarity == 'rare' %}primary{% else %}secondary{% endif %}">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ badge.icon }} {{ badge.name }}</h6>
+                                        <small class="badge bg-{% if badge.rarity == 'legendary' %}warning{% elif badge.rarity == 'epic' %}danger{% elif badge.rarity == 'rare' %}primary{% else %}secondary{% endif %}">
+                                            {{ badge.rarity|capitalize }}
+                                        </small>
+                                    </div>
+                                    <p class="mb-1">{{ badge.description }}</p>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info mt-3">
+                            {{ _('Aucun badge obtenu pour l\'instant. Les badges sont des récompenses spéciales pour des accomplissements significatifs !') }}
+                        </div>
+                    {% endif %}
+
+                    {% if stats.inventory.avatars|length > 1 or stats.inventory.themes|length > 1 %}
+                        <h6 class="mt-4">{{ _('Récompenses débloquées') }}:</h6>
+                        <div class="row">
+                            {% if stats.inventory.avatars|length > 1 %}
+                                <div class="col-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title">{{ _('Avatars') }}</h6>
+                                            <p class="card-text"><small>{{ stats.inventory.avatars|length - 1 }} {{ _('débloqués') }}</small></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if stats.inventory.themes|length > 1 %}
+                                <div class="col-6">
+                                    <div class="card bg-light">
+                                        <div class="card-body p-2">
+                                            <h6 class="card-title">{{ _('Thèmes') }}</h6>
+                                            <p class="card-text"><small>{{ stats.inventory.themes|length - 1 }} {{ _('débloqués') }}</small></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Upcoming Tests Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">{{ _('Contrôles à venir') }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.study_plans and stats.study_plans.upcoming_tests %}
+                        <div class="list-group">
+                            {% for test in stats.study_plans.upcoming_tests %}
+                                {% set days_left = ((test.test_date|string)|strptime('%Y-%m-%d') - now.date()).days %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ test.test_name }}</h6>
+                                        <small class="text-{% if days_left < 3 %}danger{% elif days_left < 7 %}warning{% else %}muted{% endif %}">
+                                            {{ test.test_date }} ({{ days_left }} {{ _('jours') }})
+                                        </small>
+                                    </div>
+                                    <p class="mb-1">{{ test.subject }}</p>
+                                    <div class="progress mt-2" style="height: 10px;">
+                                        {% set progress = (test.exercises_completed / test.num_exercises) * 100 %}
+                                        <div class="progress-bar bg-info" role="progressbar" style="width: {{ progress }}%;"
+                                             aria-valuenow="{{ progress }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                    <small>{{ test.exercises_completed }} / {{ test.num_exercises }} {{ _('exercices') }}</small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            {{ _('Aucun contrôle à venir. Créez un plan d\'étude pour commencer à suivre vos révisions.') }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Stats Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">{{ _('Statistiques d\'activité') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6 mb-4">
+                            <div class="display-6 mb-0">{{ stats.activity.completed_homework }}</div>
+                            <p class="text-muted">{{ _('Devoirs terminés') }}</p>
+                        </div>
+                        <div class="col-6 mb-4">
+                            <div class="display-6 mb-0">{{ stats.activity.viewed_grades }}</div>
+                            <p class="text-muted">{{ _('Vérifications de notes') }}</p>
+                        </div>
+                        <div class="col-6">
+                            <div class="display-6 mb-0">{{ stats.activity.checked_timetable }}</div>
+                            <p class="text-muted">{{ _('Timetable Views') }}</p>
+                        </div>
+                        <div class="col-6">
+                            <div class="display-6 mb-0">{{ stats.activity.sent_messages }}</div>
+                            <p class="text-muted">{{ _('Messages Sent') }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity Card -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">{{ _('Recent Activity') }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.recent_activity %}
+                        <div class="list-group">
+                            {% for activity in stats.recent_activity %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ activity.action }}</h6>
+                                        <small>+{{ activity.points }} {{ _('points') }}</small>
+                                    </div>
+                                    <small class="text-muted">{{ activity.date }}</small>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            {{ _('Aucune activité récente. Commencez à utiliser l\'application pour gagner des points !') }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Quests Card -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">{{ _('Daily Quests') }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.quests and stats.quests.daily %}
+                        <div class="list-group">
+                            {% for quest in stats.quests.daily %}
+                                <div class="list-group-item list-group-item-action {% if quest.completed %}list-group-item-success{% endif %}">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ quest.name }}</h6>
+                                        <small>+{{ quest.xp }} XP</small>
+                                    </div>
+                                    <p class="mb-1">{{ quest.description }}</p>
+                                    {% if quest.completed %}
+                                        <small class="text-success"><i class="fas fa-check-circle"></i> {{ _('Terminé') }}</small>
+                                    {% else %}
+                                        <small class="text-muted"><i class="fas fa-hourglass-half"></i> {{ _('En cours') }}</small>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            {{ _('Aucune quête quotidienne disponible. Revenez demain !') }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header bg-purple text-white" style="background-color: #6f42c1;">
+                    <h5 class="mb-0">{{ _('Weekly Quests') }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if stats.quests and stats.quests.weekly %}
+                        <div class="list-group">
+                            {% for quest in stats.quests.weekly %}
+                                <div class="list-group-item list-group-item-action {% if quest.completed %}list-group-item-success{% endif %}">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">{{ quest.name }}</h6>
+                                        <small>+{{ quest.xp }} XP</small>
+                                    </div>
+                                    <p class="mb-1">{{ quest.description }}</p>
+                                    {% if quest.completed %}
+                                        <small class="text-success"><i class="fas fa-check-circle"></i> {{ _('Terminé') }}</small>
+                                    {% else %}
+                                        <div class="progress mt-2" style="height: 10px;">
+                                            {% set progress_percent = (quest.progress / quest.target) * 100 %}
+                                            <div class="progress-bar bg-info" role="progressbar" style="width: {{ progress_percent }}%;"
+                                                aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">{{ quest.progress }} / {{ quest.target }}</small>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            {{ _('Aucune quête hebdomadaire disponible. Revenez la semaine prochaine !') }}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Study Plans and Contrôle Streak Cards Row -->
+    <div class="row mb-4">
+        <!-- Study Plans Card -->
+        <div class="col-md-8">
+            <div class="card h-100">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">{{ _('Plans d\'étude pour les contrôles') }}</h5>
+                        <button type="button" class="btn btn-sm btn-light" id="toggleStudyPlanForm">
+                            <i class="fas fa-plus"></i> {{ _('Nouveau Plan') }}
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Inline Study Plan Form (initially hidden) -->
+                    <div id="inlineStudyPlanForm" style="display: none;" class="mb-4 p-3 border rounded bg-light">
+                        <h5 class="mb-3">{{ _('Créer un plan d\'étude') }}</h5>
+                        <form id="studyPlanForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="testName" class="form-label">{{ _('Nom du contrôle') }}</label>
+                                    <input type="text" class="form-control" id="testName" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="testDate" class="form-label">{{ _('Date du contrôle') }}</label>
+                                    <input type="date" class="form-control" id="testDate" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="subject" class="form-label">{{ _('Matière') }}</label>
+                                    <input type="text" class="form-control" id="subject" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="numExercises" class="form-label">{{ _('Nombre d\'exercices à faire') }}</label>
+                                    <input type="number" class="form-control" id="numExercises" min="1" value="5" required>
+                                </div>
+                            </div>
+                            <div class="form-text mb-3">{{ _('Vous devrez faire ce nombre d\'exercices avant le contrôle, mais seulement un par jour sera compté.') }}</div>
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-secondary me-2" id="cancelStudyPlan">{{ _('Annuler') }}</button>
+                                <button type="button" class="btn btn-primary" id="submitStudyPlan">{{ _('Créer') }}</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="studyPlansContainer">
+                        <div class="text-center py-3">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contrôle Streak Card -->
+        <div class="col-md-4">
+            <div class="card h-100">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">{{ _('Contrôle Streak') }}</h5>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                    <div class="display-1 mb-3 text-warning">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="display-4 mb-2">{{ stats.study_plans.streak if stats.study_plans and stats.study_plans.streak else 0 }}</div>
+                    <p class="text-muted text-center">{{ _('Contrôles consécutifs avec une note supérieure à la moyenne') }}</p>
+
+                    <div class="mt-3 text-center">
+                        <div class="badge bg-success p-2 mb-2">
+                            <i class="fas fa-trophy"></i> {{ _('Record') }}: {{ stats.study_plans.max_streak if stats.study_plans and stats.study_plans.max_streak else 0 }}
+                        </div>
+                        <p class="small text-muted">{{ _('Maintenez votre streak en obtenant de bonnes notes!') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Card -->
+    <div class="card mb-4">
+        <div class="card-header bg-danger text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">{{ _('Leaderboard') }}</h5>
+                <a href="{{ url_for('leaderboard') }}" class="btn btn-sm btn-light">{{ _('View Full Leaderboard') }}</a>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if leaderboard %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>{{ _('User') }}</th>
+                                <th>{{ _('Level') }}</th>
+                                <th>{{ _('Points') }}</th>
+                                <th>{{ _('Streak') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in leaderboard %}
+                                <tr {% if user.username == session.username %}class="table-primary"{% endif %}>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ user.username }}</td>
+                                    <td>{{ user.level }}</td>
+                                    <td>{{ user.points }}</td>
+                                    <td>{{ user.streak }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    {{ _('Aucune donnée de classement disponible pour l\'instant.') }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+
+
+<!-- JavaScript for Study Plans -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load study plans
+    loadStudyPlans();
+
+    // Toggle study plan form
+    document.getElementById('toggleStudyPlanForm').addEventListener('click', function() {
+        const formElement = document.getElementById('inlineStudyPlanForm');
+        formElement.style.display = formElement.style.display === 'none' ? 'block' : 'none';
+    });
+
+    // Cancel button
+    document.getElementById('cancelStudyPlan').addEventListener('click', function() {
+        document.getElementById('inlineStudyPlanForm').style.display = 'none';
+        document.getElementById('studyPlanForm').reset();
+    });
+
+    // Submit button
+    document.getElementById('submitStudyPlan').addEventListener('click', function() {
+        createStudyPlan();
+    });
+});
+
+function loadStudyPlans() {
+    fetch('/api/gamification/study_plans')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayStudyPlans(data.data);
+            } else {
+                showError('Échec du chargement des plans d\'étude');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading study plans:', error);
+            showError('Échec du chargement des plans d\'étude');
+        });
+}
+
+function displayStudyPlans(studyPlans) {
+    const container = document.getElementById('studyPlansContainer');
+
+    if (!studyPlans || studyPlans.length === 0) {
+        container.innerHTML = `
+            <div class="alert alert-info">
+                {{ _('Vous n\'avez pas encore de plans d\'étude. Créez-en un pour commencer à suivre vos révisions pour les contrôles à venir.') }}
+            </div>
+        `;
+        return;
+    }
+
+    // Group by subject
+    const plansBySubject = {};
+    studyPlans.forEach(plan => {
+        if (!plansBySubject[plan.subject]) {
+            plansBySubject[plan.subject] = [];
+        }
+        plansBySubject[plan.subject].push(plan);
+    });
+
+    let html = '';
+
+    // Create accordion for subjects
+    html += '<div class="accordion" id="studyPlansAccordion">';
+
+    let index = 0;
+    for (const subject in plansBySubject) {
+        const plans = plansBySubject[subject];
+        const subjectId = `subject-${index}`;
+
+        html += `
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="heading-${subjectId}">
+                    <button class="accordion-button ${index > 0 ? 'collapsed' : ''}" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#collapse-${subjectId}" aria-expanded="${index === 0}"
+                            aria-controls="collapse-${subjectId}">
+                        ${subject} (${plans.length})
+                    </button>
+                </h2>
+                <div id="collapse-${subjectId}" class="accordion-collapse collapse ${index === 0 ? 'show' : ''}"
+                     aria-labelledby="heading-${subjectId}" data-bs-parent="#studyPlansAccordion">
+                    <div class="accordion-body">
+                        <div class="list-group">
+        `;
+
+        plans.forEach(plan => {
+            const testDate = new Date(plan.test_date);
+            const formattedDate = testDate.toLocaleDateString();
+            const daysLeft = Math.ceil((testDate - new Date()) / (1000 * 60 * 60 * 24));
+
+            const progressPercent = (plan.exercises_completed / plan.num_exercises) * 100;
+            const isCompleted = plan.completed;
+
+            html += `
+                <div class="list-group-item list-group-item-action ${isCompleted ? 'list-group-item-success' : ''}">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${plan.test_name}</h6>
+                        <small class="text-${daysLeft < 3 ? 'danger' : daysLeft < 7 ? 'warning' : 'muted'}">
+                            ${formattedDate} (${daysLeft > 0 ? `${daysLeft} {{ _('jours restants') }}` : '{{ _('Aujourd\'hui') }}'})
+                        </small>
+                    </div>
+                    <div class="progress mt-2 mb-2" style="height: 10px;">
+                        <div class="progress-bar ${isCompleted ? 'bg-success' : 'bg-info'}" role="progressbar"
+                             style="width: ${progressPercent}%;" aria-valuenow="${progressPercent}"
+                             aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small>${plan.exercises_completed} / ${plan.num_exercises} {{ _('exercices') }}</small>
+                        <div>
+                            ${!isCompleted ? `
+                                <button class="btn btn-sm btn-outline-primary track-exercise-btn"
+                                        data-plan-id="${plan.id}" ${plan.last_exercise_date === new Date().toISOString().split('T')[0] ? 'disabled' : ''}>
+                                    <i class="fas fa-check"></i> {{ _('Exercice fait') }}
+                                </button>
+                            ` : ''}
+                            <button class="btn btn-sm btn-outline-danger delete-plan-btn" data-plan-id="${plan.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += `
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        index++;
+    }
+
+    html += '</div>';
+
+    container.innerHTML = html;
+
+    // Add event listeners for buttons
+    document.querySelectorAll('.track-exercise-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const planId = this.getAttribute('data-plan-id');
+            trackExercise(planId);
+        });
+    });
+
+    document.querySelectorAll('.delete-plan-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const planId = this.getAttribute('data-plan-id');
+            deletePlan(planId);
+        });
+    });
+}
+
+function createStudyPlan() {
+    const testName = document.getElementById('testName').value;
+    const testDate = document.getElementById('testDate').value;
+    const subject = document.getElementById('subject').value;
+    const numExercises = document.getElementById('numExercises').value;
+
+    if (!testName || !testDate || !subject || !numExercises) {
+        showError('Veuillez remplir tous les champs');
+        return;
+    }
+
+    const data = {
+        test_name: testName,
+        test_date: testDate,
+        subject: subject,
+        num_exercises: parseInt(numExercises)
+    };
+
+    fetch('/api/gamification/study_plans', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Hide the form
+            document.getElementById('inlineStudyPlanForm').style.display = 'none';
+
+            // Reset form
+            document.getElementById('studyPlanForm').reset();
+
+            // Reload study plans
+            loadStudyPlans();
+
+            // Show success message
+            showSuccess('Plan d\'étude créé avec succès');
+        } else {
+            showError(data.message || 'Échec de la création du plan d\'étude');
+        }
+    })
+    .catch(error => {
+        console.error('Error creating study plan:', error);
+        showError('Échec de la création du plan d\'étude');
+    });
+}
+
+function trackExercise(planId) {
+    fetch(`/api/gamification/study_plans/${planId}/track`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reload study plans
+            loadStudyPlans();
+
+            // Show success message with points
+            showSuccess(`${data.message} (+${data.points_earned} points)`);
+        } else {
+            showError(data.message || 'Échec de l\'enregistrement de l\'exercice');
+        }
+    })
+    .catch(error => {
+        console.error('Error tracking exercise:', error);
+        showError('Échec de l\'enregistrement de l\'exercice');
+    });
+}
+
+function deletePlan(planId) {
+    if (!confirm('{{ _('Êtes-vous sûr de vouloir supprimer ce plan d\'étude ?') }}')) {
+        return;
+    }
+
+    fetch(`/api/gamification/study_plans/${planId}`, {
+        method: 'DELETE'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reload study plans
+            loadStudyPlans();
+
+            // Show success message
+            showSuccess('Plan d\'étude supprimé avec succès');
+        } else {
+            showError(data.message || 'Échec de la suppression du plan d\'étude');
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting study plan:', error);
+        showError('Échec de la suppression du plan d\'étude');
+    });
+}
+
+function showSuccess(message) {
+    // You can implement this based on your UI
+    alert(message);
+}
+
+function showError(message) {
+    // You can implement this based on your UI
+    alert('Error: ' + message);
+}
+</script>
+
+        </div>
+        <!-- End of Gamification Tab -->
+        
+        <!-- Study Analytics Tab -->
+        <div class="tab-pane fade" id="analytics-content" role="tabpanel" aria-labelledby="analytics-tab">
+            <div class="row">
+                <!-- Study Stats Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{{ _('Study Statistics') }}</h5>
+                                <div class="btn-group">
+                                    <a href="?period=week" class="btn btn-sm btn-light {{ 'active' if study_period == 'week' }}">{{ _('Week') }}</a>
+                                    <a href="?period=month" class="btn btn-sm btn-light {{ 'active' if study_period == 'month' }}">{{ _('Month') }}</a>
+                                    <a href="?period=year" class="btn btn-sm btn-light {{ 'active' if study_period == 'year' }}">{{ _('Year') }}</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-6 mb-4">
+                                    <div class="display-6 mb-0">{{ study_data.total_time|default('0') }}</div>
+                                    <p class="text-muted">{{ _('Total Study Time') }}</p>
+                                </div>
+                                <div class="col-6 mb-4">
+                                    <div class="display-6 mb-0">{{ study_data.cards_reviewed|default('0') }}</div>
+                                    <p class="text-muted">{{ _('Cards Reviewed') }}</p>
+                                </div>
+                                <div class="col-6">
+                                    <div class="display-6 mb-0">{{ study_data.accuracy|default('0') }}%</div>
+                                    <p class="text-muted">{{ _('Accuracy') }}</p>
+                                </div>
+                                <div class="col-6">
+                                    <div class="display-6 mb-0">{{ study_data.streak|default('0') }}</div>
+                                    <p class="text-muted">{{ _('Study Streak') }}</p>
+                                </div>
+                            </div>
+                            
+                            {% if study_data.activity %}
+                                <h6 class="mt-4">{{ _('Study Activity') }}</h6>
+                                <canvas id="studyActivityChart" width="400" height="200"></canvas>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Subject Performance Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">{{ _('Subject Performance') }}</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if study_data.subjects %}
+                                <canvas id="subjectPerformanceChart" width="400" height="300"></canvas>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    {{ _('No subject performance data available yet. Start studying to see your progress!') }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Flashcard Progress Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">{{ _('Flashcard Progress') }}</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if flashcard_sets %}
+                                <div class="list-group">
+                                    {% for set in flashcard_sets %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">{{ set.name }}</h6>
+                                                <small>{{ set.subject }}</small>
+                                            </div>
+                                            <div class="progress mt-2 mb-1" style="height: 10px;">
+                                                <div class="progress-bar bg-success" role="progressbar" 
+                                                     style="width: {{ set.mastery_percentage }}%;" 
+                                                     aria-valuenow="{{ set.mastery_percentage }}" 
+                                                     aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                            <small class="text-muted">{{ set.mastery_percentage }}% {{ _('Mastery') }} - {{ set.cards_mastered }}/{{ set.total_cards }} {{ _('Cards') }}</small>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    {{ _('No flashcard sets found. Create some flashcards to track your progress!') }}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Study Recommendations Card -->
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">{{ _('Study Recommendations') }}</h5>
+                        </div>
+                        <div class="card-body">
+                            {% if recommendations %}
+                                <div class="list-group">
+                                    {% for rec in recommendations %}
+                                        <div class="list-group-item">
+                                            <div class="d-flex align-items-center">
+                                                <div class="me-3 fs-4">
+                                                    {% if rec.type == 'review' %}
+                                                        <i class="fas fa-sync-alt text-warning"></i>
+                                                    {% elif rec.type == 'focus' %}
+                                                        <i class="fas fa-bullseye text-danger"></i>
+                                                    {% elif rec.type == 'schedule' %}
+                                                        <i class="fas fa-calendar-alt text-primary"></i>
+                                                    {% else %}
+                                                        <i class="fas fa-lightbulb text-success"></i>
+                                                    {% endif %}
+                                                </div>
+                                                <div>
+                                                    <h6 class="mb-1">{{ rec.title }}</h6>
+                                                    <p class="mb-0">{{ rec.description }}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="alert alert-info">
+                                    {{ _('No recommendations available yet. Continue studying to receive personalized suggestions!') }}
+                                </div>
+                            {% endif %}
+                            
+                            {% if difficult_cards %}
+                                <h6 class="mt-4">{{ _('Difficult Cards') }}</h6>
+                                <div class="list-group">
+                                    {% for card in difficult_cards %}
+                                        <div class="list-group-item list-group-item-action">
+                                            <div class="d-flex w-100 justify-content-between">
+                                                <h6 class="mb-1">{{ card.question|truncate(50) }}</h6>
+                                                <small class="badge bg-danger">{{ card.failure_rate }}%</small>
+                                            </div>
+                                            <p class="mb-1 text-muted">{{ card.set_name }} ({{ card.subject }})</p>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End of Study Analytics Tab -->
+    </div>
+</div>
+
+<!-- Study Analytics Charts JavaScript -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize charts if data is available
+    {% if study_data and study_data.activity and study_data.activity.labels and study_data.activity.study_time and study_data.activity.cards_reviewed %}
+        const activityCtx = document.getElementById('studyActivityChart').getContext('2d');
+        const activityChart = new Chart(activityCtx, {
+            type: 'line',
+            data: {
+                labels: {{ study_data.activity.labels|default([])|tojson }},
+                datasets: [{
+                    label: '{{ _("Study Time (minutes)") }}',
+                    data: {{ study_data.activity.study_time|default([])|tojson }},
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                }, {
+                    label: '{{ _("Cards Reviewed") }}',
+                    data: {{ study_data.activity.cards_reviewed|default([])|tojson }},
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 2,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    {% endif %}
+    
+    {% if study_data and study_data.subjects and study_data.subjects.labels and study_data.subjects.mastery %}
+        const subjectCtx = document.getElementById('subjectPerformanceChart').getContext('2d');
+        const subjectChart = new Chart(subjectCtx, {
+            type: 'radar',
+            data: {
+                labels: {{ study_data.subjects.labels|default([])|tojson }},
+                datasets: [{
+                    label: '{{ _("Mastery (%)") }}',
+                    data: {{ study_data.subjects.mastery|default([])|tojson }},
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    pointBackgroundColor: 'rgba(75, 192, 192, 1)'
+                }]
+            },
+            options: {
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            stepSize: 20
+                        }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    {% endif %}
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,609 @@
+{% extends "base.html" %}
+
+{% block title %}AI Learning Assistant{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/ai_assistant.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container ai-assistant-container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card ai-card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">{{ _('AI Learning Assistant') }}</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info fade-in">
+                        {{ _('Your AI-powered learning assistant helps you create study materials and optimize your learning.') }}
+                    </div>
+                    
+                    <ul class="nav nav-tabs ai-tabs" id="aiAssistantTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="flashcard-generator-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#flashcard-generator" type="button" role="tab" 
+                                    aria-controls="flashcard-generator" aria-selected="true">
+                                <i class="fas fa-magic me-2"></i>{{ _('Flashcard Generator') }}
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="practice-questions-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#practice-questions" type="button" role="tab" 
+                                    aria-controls="practice-questions" aria-selected="false">
+                                <i class="fas fa-question-circle me-2"></i>{{ _('Practice Questions') }}
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="study-recommendations-tab" data-bs-toggle="tab" 
+                                    data-bs-target="#study-recommendations" type="button" role="tab" 
+                                    aria-controls="study-recommendations" aria-selected="false">
+                                <i class="fas fa-chart-line me-2"></i>{{ _('Study Recommendations') }}
+                            </button>
+                        </li>
+                    </ul>
+                    
+                    <div class="tab-content ai-tab-content" id="aiAssistantTabContent">
+                        <!-- Flashcard Generator Tab -->
+                        <div class="tab-pane fade show active" id="flashcard-generator" role="tabpanel" 
+                             aria-labelledby="flashcard-generator-tab">
+                            <h4 class="mb-3">{{ _('Generate Flashcards from Text') }}</h4>
+                            <p>{{ _('Paste your notes or textbook content below, and the AI will automatically generate flashcards for you.') }}</p>
+                            
+                            <form id="flashcardGeneratorForm" class="flashcard-generator-form">
+                                <div class="mb-3">
+                                    <label for="subject" class="form-label">{{ _('Subject') }}</label>
+                                    <input type="text" class="form-control" id="subject" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="setName" class="form-label">{{ _('Set Name (Optional)') }}</label>
+                                    <input type="text" class="form-control" id="setName" 
+                                           placeholder="{{ _('Will be generated automatically if left blank') }}">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="textContent" class="form-label">{{ _('Text Content') }}</label>
+                                    <textarea class="form-control" id="textContent" rows="10" required></textarea>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-magic me-2"></i>{{ _('Generate Flashcards') }}
+                                </button>
+                            </form>
+                            
+                            <div id="flashcardGeneratorResult" class="flashcard-generator-result mt-4 d-none">
+                                <div class="alert alert-success">
+                                    <h5>{{ _('Flashcards Generated Successfully!') }}</h5>
+                                    <p id="flashcardGeneratorSummary"></p>
+                                    <a id="viewFlashcardsLink" href="#" class="btn btn-success btn-sm">
+                                        <i class="fas fa-eye me-1"></i>{{ _('View Flashcards') }}
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Practice Questions Tab -->
+                        <div class="tab-pane fade" id="practice-questions" role="tabpanel" 
+                             aria-labelledby="practice-questions-tab">
+                            <h4 class="mb-3">{{ _('Generate Practice Questions') }}</h4>
+                            <p>{{ _('Select a flashcard set to generate practice questions based on its content.') }}</p>
+                            
+                            <form id="practiceQuestionsForm">
+                                <div class="mb-3">
+                                    <label for="flashcardSet" class="form-label">{{ _('Flashcard Set') }}</label>
+                                    <select class="form-select" id="flashcardSet" required>
+                                        <option value="" selected disabled>{{ _('Select a flashcard set') }}</option>
+                                        {% for set in flashcard_sets %}
+                                        <option value="{{ set.id }}">{{ set.name }} ({{ set.subject }})</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="numQuestions" class="form-label">{{ _('Number of Questions') }}</label>
+                                    <input type="number" class="form-control" id="numQuestions" min="1" max="20" value="5">
+                                </div>
+                                
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-question-circle me-2"></i>{{ _('Generate Questions') }}
+                                </button>
+                            </form>
+                            
+                            <div id="practiceQuestionsResult" class="mt-4 d-none fade-in">
+                                <h5>{{ _('Practice Questions') }}</h5>
+                                <div id="practiceQuestionsContainer" class="practice-questions-container"></div>
+                                
+                                <div class="mt-3">
+                                    <button id="checkAnswersBtn" class="btn btn-success">
+                                        <i class="fas fa-check me-2"></i>{{ _('Check Answers') }}
+                                    </button>
+                                    <button id="newQuestionsBtn" class="btn btn-primary ms-2">
+                                        <i class="fas fa-sync me-2"></i>{{ _('Generate New Questions') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Study Recommendations Tab -->
+                        <div class="tab-pane fade" id="study-recommendations" role="tabpanel" 
+                             aria-labelledby="study-recommendations-tab">
+                            <h4 class="mb-3">{{ _('Smart Study Recommendations') }}</h4>
+                            <p>{{ _('Based on your performance, here are personalized recommendations to optimize your learning.') }}</p>
+                            
+                            <div class="row">
+                                <!-- Due Cards -->
+                                <div class="col-md-6 mb-4">
+                                    <div class="card recommendation-card h-100">
+                                        <div class="card-header bg-info text-white">
+                                            <h5 class="mb-0">{{ _('Cards Due for Review') }}</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <div class="recommendation-count" id="dueCardsCount">{{ recommendations.due_cards_count }}</div>
+                                                <div>{{ _('cards need your attention') }}</div>
+                                            </div>
+                                            
+                                            {% if recommendations.due_cards_count > 0 %}
+                                            <a href="/flashcards" class="btn btn-info">
+                                                <i class="fas fa-play me-2"></i>{{ _('Review Now') }}
+                                            </a>
+                                            {% else %}
+                                            <div class="alert alert-success">
+                                                {{ _('Great job! You\'re all caught up with your reviews.') }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Weak Subjects -->
+                                <div class="col-md-6 mb-4">
+                                    <div class="card recommendation-card h-100">
+                                        <div class="card-header bg-warning text-dark">
+                                            <h5 class="mb-0">{{ _('Areas for Improvement') }}</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            {% if recommendations.weak_subjects %}
+                                            <ul class="list-group">
+                                                {% for subject in recommendations.weak_subjects %}
+                                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                    {{ subject.subject }}
+                                                    <div>
+                                                        <div class="progress" style="width: 100px;">
+                                                            <div class="progress-bar bg-warning" role="progressbar" 
+                                                                 style="width: {{ subject.score * 100 }}%;" 
+                                                                 aria-valuenow="{{ subject.score * 100 }}" 
+                                                                 aria-valuemin="0" aria-valuemax="100">
+                                                                {{ (subject.score * 100)|int }}%
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                                {% endfor %}
+                                            </ul>
+                                            {% else %}
+                                            <div class="alert alert-info">
+                                                {{ _('No weak areas identified yet. Keep studying to get personalized recommendations.') }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Recommended Sets -->
+                                <div class="col-md-12 mb-4">
+                                    <div class="card recommendation-card">
+                                        <div class="card-header bg-success text-white">
+                                            <h5 class="mb-0">{{ _('Recommended Study Sets') }}</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            {% if recommendations.recommended_sets %}
+                                            <div class="table-responsive">
+                                                <table class="table table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>{{ _('Set Name') }}</th>
+                                                            <th>{{ _('Subject') }}</th>
+                                                            <th>{{ _('Due Cards') }}</th>
+                                                            <th>{{ _('Reason') }}</th>
+                                                            <th>{{ _('Action') }}</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {% for set in recommendations.recommended_sets %}
+                                                        <tr>
+                                                            <td>{{ set.name }}</td>
+                                                            <td>{{ set.subject }}</td>
+                                                            <td>{{ set.due_cards }} / {{ set.total_cards }}</td>
+                                                            <td>{{ set.reason }}</td>
+                                                            <td>
+                                                                <a href="/flashcards/quiz/{{ set.id }}" class="btn btn-sm btn-success">
+                                                                    <i class="fas fa-play me-1"></i>{{ _('Study') }}
+                                                                </a>
+                                                            </td>
+                                                        </tr>
+                                                        {% endfor %}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            {% else %}
+                                            <div class="alert alert-info">
+                                                {{ _('No recommended sets yet. Create and study flashcard sets to get personalized recommendations.') }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Study Tips -->
+                                <div class="col-md-12">
+                                    <div class="card recommendation-card">
+                                        <div class="card-header bg-primary text-white">
+                                            <h5 class="mb-0">{{ _('Study Tips') }}</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                {% for tip in recommendations.study_tips %}
+                                                <div class="col-md-4 mb-3">
+                                                    <div class="card study-tip-card h-100">
+                                                        <div class="card-body">
+                                                            <i class="fas fa-lightbulb study-tip-icon me-2"></i>{{ tip }}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <button id="refreshRecommendationsBtn" class="btn btn-primary">
+                                    <i class="fas fa-sync me-2"></i>{{ _('Refresh Recommendations') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Templates for practice questions -->
+<template id="multipleChoiceTemplate">
+    <div class="card mb-3 practice-question fade-in" data-type="multiple_choice" data-id="{id}">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">{{ _('Multiple Choice Question') }}</h5>
+        </div>
+        <div class="card-body">
+            <p class="question-text">{question}</p>
+            <div class="options">
+                {options}
+            </div>
+            <div class="feedback mt-3 d-none"></div>
+        </div>
+    </div>
+</template>
+
+<template id="trueFalseTemplate">
+    <div class="card mb-3 practice-question fade-in" data-type="true_false" data-id="{id}">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">{{ _('True or False') }}</h5>
+        </div>
+        <div class="card-body">
+            <p class="question-text">{question}</p>
+            <div class="options">
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="tf-{id}" id="true-{id}" value="true">
+                    <label class="form-check-label" for="true-{id}">
+                        {{ _('True') }}
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="tf-{id}" id="false-{id}" value="false">
+                    <label class="form-check-label" for="false-{id}">
+                        {{ _('False') }}
+                    </label>
+                </div>
+            </div>
+            <div class="feedback mt-3 d-none"></div>
+        </div>
+    </div>
+</template>
+
+<template id="shortAnswerTemplate">
+    <div class="card mb-3 practice-question fade-in" data-type="short_answer" data-id="{id}">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">{{ _('Short Answer Question') }}</h5>
+        </div>
+        <div class="card-body">
+            <p class="question-text">{question}</p>
+            <div class="mb-3">
+                <textarea class="form-control" rows="3" placeholder="{{ _('Type your answer here...') }}"></textarea>
+            </div>
+            <div class="feedback mt-3 d-none"></div>
+        </div>
+    </div>
+</template>
+
+<template id="optionTemplate">
+    <div class="form-check">
+        <input class="form-check-input" type="radio" name="mc-{questionId}" id="option-{questionId}-{index}" value="{index}">
+        <label class="form-check-label" for="option-{questionId}-{index}">
+            {option}
+        </label>
+    </div>
+</template>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Flashcard Generator Form
+    const flashcardGeneratorForm = document.getElementById('flashcardGeneratorForm');
+    const flashcardGeneratorResult = document.getElementById('flashcardGeneratorResult');
+    const flashcardGeneratorSummary = document.getElementById('flashcardGeneratorSummary');
+    const viewFlashcardsLink = document.getElementById('viewFlashcardsLink');
+    
+    if (flashcardGeneratorForm) {
+        flashcardGeneratorForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const subject = document.getElementById('subject').value;
+            const setName = document.getElementById('setName').value;
+            const textContent = document.getElementById('textContent').value;
+            
+            if (!subject || !textContent) {
+                alert('{{ _("Please fill in all required fields.") }}');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = flashcardGeneratorForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Generating...") }}';
+            
+            // Add loading spinner
+            const loadingSpinner = document.createElement('div');
+            loadingSpinner.className = 'spinner-container mt-4';
+            loadingSpinner.innerHTML = '<div class="spinner-border text-primary spinner" role="status"><span class="visually-hidden">Loading...</span></div>';
+            flashcardGeneratorForm.appendChild(loadingSpinner);
+            
+            // Send request to generate flashcards
+            fetch('/api/ai/generate-flashcards', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    subject: subject,
+                    set_name: setName,
+                    text_content: textContent
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                
+                if (data.success) {
+                    // Show success message
+                    flashcardGeneratorResult.classList.remove('d-none');
+                    flashcardGeneratorSummary.textContent = `{{ _("Created") }} ${data.card_count} {{ _("flashcards in set") }} "${data.set_name}".`;
+                    viewFlashcardsLink.href = `/flashcards/edit/${data.set_id}`;
+                    
+                    // Clear form
+                    document.getElementById('subject').value = '';
+                    document.getElementById('setName').value = '';
+                    document.getElementById('textContent').value = '';
+                } else {
+                    alert(`{{ _("Error:") }} ${data.message}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                alert('{{ _("An error occurred. Please try again.") }}');
+            });
+        });
+    }
+    
+    // Practice Questions Form
+    const practiceQuestionsForm = document.getElementById('practiceQuestionsForm');
+    const practiceQuestionsResult = document.getElementById('practiceQuestionsResult');
+    const practiceQuestionsContainer = document.getElementById('practiceQuestionsContainer');
+    const checkAnswersBtn = document.getElementById('checkAnswersBtn');
+    const newQuestionsBtn = document.getElementById('newQuestionsBtn');
+    
+    // Store questions data
+    let questionsData = [];
+    
+    if (practiceQuestionsForm) {
+        practiceQuestionsForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const setId = document.getElementById('flashcardSet').value;
+            const numQuestions = document.getElementById('numQuestions').value;
+            
+            if (!setId) {
+                alert('{{ _("Please select a flashcard set.") }}');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = practiceQuestionsForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Generating...") }}';
+            
+            // Send request to generate practice questions
+            fetch('/api/ai/generate-practice-questions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    set_id: setId,
+                    num_questions: numQuestions
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                
+                if (data.success) {
+                    // Store questions data
+                    questionsData = data.questions;
+                    
+                    // Show questions
+                    renderPracticeQuestions(questionsData);
+                    
+                    // Show results container
+                    practiceQuestionsResult.classList.remove('d-none');
+                } else {
+                    alert(`{{ _("Error:") }} ${data.message}`);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                alert('{{ _("An error occurred. Please try again.") }}');
+            });
+        });
+    }
+    
+    // Render practice questions
+    function renderPracticeQuestions(questions) {
+        practiceQuestionsContainer.innerHTML = '';
+        
+        questions.forEach((question, index) => {
+            const questionId = `q-${index}`;
+            
+            if (question.type === 'multiple_choice') {
+                const template = document.getElementById('multipleChoiceTemplate').innerHTML;
+                let optionsHtml = '';
+                
+                question.options.forEach((option, optIndex) => {
+                    const optionTemplate = document.getElementById('optionTemplate').innerHTML;
+                    optionsHtml += optionTemplate
+                        .replace(/{questionId}/g, questionId)
+                        .replace(/{index}/g, optIndex)
+                        .replace(/{option}/g, option);
+                });
+                
+                let html = template
+                    .replace(/{id}/g, questionId)
+                    .replace(/{question}/g, question.question)
+                    .replace(/{options}/g, optionsHtml);
+                
+                practiceQuestionsContainer.innerHTML += html;
+            } else if (question.type === 'true_false') {
+                const template = document.getElementById('trueFalseTemplate').innerHTML;
+                let html = template
+                    .replace(/{id}/g, questionId)
+                    .replace(/{question}/g, question.question);
+                
+                practiceQuestionsContainer.innerHTML += html;
+            } else if (question.type === 'short_answer') {
+                const template = document.getElementById('shortAnswerTemplate').innerHTML;
+                let html = template
+                    .replace(/{id}/g, questionId)
+                    .replace(/{question}/g, question.question);
+                
+                practiceQuestionsContainer.innerHTML += html;
+            }
+        });
+        
+        // Reset any previous feedback
+        document.querySelectorAll('.feedback').forEach(el => {
+            el.classList.add('d-none');
+            el.innerHTML = '';
+        });
+    }
+    
+    // Check answers
+    if (checkAnswersBtn) {
+        checkAnswersBtn.addEventListener('click', function() {
+            const questionElements = document.querySelectorAll('.practice-question');
+            
+            questionElements.forEach((element, index) => {
+                const questionId = element.dataset.id;
+                const questionType = element.dataset.type;
+                const question = questionsData[index];
+                const feedbackElement = element.querySelector('.feedback');
+                
+                let userAnswer;
+                let isCorrect = false;
+                
+                if (questionType === 'multiple_choice') {
+                    const selectedOption = element.querySelector(`input[name="mc-${questionId}"]:checked`);
+                    if (selectedOption) {
+                        userAnswer = parseInt(selectedOption.value);
+                        isCorrect = userAnswer === question.correct_answer;
+                    } else {
+                        userAnswer = null;
+                    }
+                } else if (questionType === 'true_false') {
+                    const selectedOption = element.querySelector(`input[name="tf-${questionId}"]:checked`);
+                    if (selectedOption) {
+                        userAnswer = selectedOption.value === 'true';
+                        isCorrect = userAnswer === question.correct_answer;
+                    } else {
+                        userAnswer = null;
+                    }
+                } else if (questionType === 'short_answer') {
+                    const textarea = element.querySelector('textarea');
+                    userAnswer = textarea.value.trim();
+                    
+                    // For short answer, we'll just show the model answer
+                    isCorrect = null;
+                }
+                
+                // Show feedback
+                feedbackElement.classList.remove('d-none');
+                
+                if (userAnswer === null) {
+                    feedbackElement.innerHTML = `<div class="alert alert-warning">{{ _("Please answer this question.") }}</div>`;
+                } else if (isCorrect === true) {
+                    feedbackElement.innerHTML = `<div class="alert alert-success">{{ _("Correct!") }} ${question.explanation}</div>`;
+                } else if (isCorrect === false) {
+                    feedbackElement.innerHTML = `<div class="alert alert-danger">{{ _("Incorrect.") }} ${question.explanation}</div>`;
+                } else {
+                    // Short answer
+                    feedbackElement.innerHTML = `<div class="alert alert-info">{{ _("Model answer:") }} ${question.correct_answer}</div>`;
+                }
+            });
+        });
+    }
+    
+    // Generate new questions
+    if (newQuestionsBtn) {
+        newQuestionsBtn.addEventListener('click', function() {
+            practiceQuestionsForm.dispatchEvent(new Event('submit'));
+        });
+    }
+    
+    // Refresh recommendations
+    const refreshRecommendationsBtn = document.getElementById('refreshRecommendationsBtn');
+    
+    if (refreshRecommendationsBtn) {
+        refreshRecommendationsBtn.addEventListener('click', function() {
+            // Show loading state
+            const originalBtnText = refreshRecommendationsBtn.innerHTML;
+            refreshRecommendationsBtn.disabled = true;
+            refreshRecommendationsBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{{ _("Refreshing...") }}';
+            
+            // Reload the page to get fresh recommendations
+            window.location.reload();
+        });
+    }
+});
+</script>
+{% endblock %}

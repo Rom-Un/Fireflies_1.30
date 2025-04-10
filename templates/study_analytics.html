@@ -1,0 +1,579 @@
+{% extends 'base.html' %}
+
+{% block title %}Study Analytics - Fireflies{% endblock %}
+
+{% block content %}
+<div class="container fade-in">
+    <h1 class="page-title mb-4">{{ _('Study Analytics') }}</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ _('Study Overview') }}</h5>
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-sm btn-outline-primary active" id="time-week">{{ _('Week') }}</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="time-month">{{ _('Month') }}</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary" id="time-year">{{ _('Year') }}</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="card bg-light mb-3">
+                                <div class="card-body text-center">
+                                    <h2 id="total-study-time">{{ study_stats.total_time|default('0h 0m') }}</h2>
+                                    <p class="text-muted mb-0">{{ _('Total Study Time') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light mb-3">
+                                <div class="card-body text-center">
+                                    <h2 id="cards-reviewed">{{ study_stats.cards_reviewed|default('0') }}</h2>
+                                    <p class="text-muted mb-0">{{ _('Cards Reviewed') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light mb-3">
+                                <div class="card-body text-center">
+                                    <h2 id="accuracy-rate">{{ study_stats.accuracy|default('0') }}%</h2>
+                                    <p class="text-muted mb-0">{{ _('Accuracy Rate') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-light mb-3">
+                                <div class="card-body text-center">
+                                    <h2 id="study-streak">{{ study_stats.streak|default('0') }}</h2>
+                                    <p class="text-muted mb-0">{{ _('Study Streak') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h5>{{ _('Study Activity') }}</h5>
+                        <div id="study-activity-chart" style="height: 250px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Subject Performance') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="subject-performance-chart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Learning Progress') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="learning-progress-chart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Study Heatmap') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="study-heatmap" style="height: 200px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">{{ _('Flashcard Sets Progress') }}</h5>
+                    <div class="input-group" style="width: 250px;">
+                        <input type="text" class="form-control form-control-sm" id="search-sets" placeholder="{{ _('Search sets...') }}">
+                        <button class="btn btn-sm btn-outline-secondary" type="button" id="search-button">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>{{ _('Set Name') }}</th>
+                                    <th>{{ _('Subject') }}</th>
+                                    <th>{{ _('Cards') }}</th>
+                                    <th>{{ _('Mastery') }}</th>
+                                    <th>{{ _('Last Studied') }}</th>
+                                    <th>{{ _('Due Cards') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="flashcard-sets-table">
+                                {% for set in flashcard_sets %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ url_for('flashcard_quiz', set_id=set.id) }}">{{ set.name }}</a>
+                                    </td>
+                                    <td>{{ set.subject }}</td>
+                                    <td>{{ set.card_count }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 10px;">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ set.mastery|default(0) }}%;" aria-valuenow="{{ set.mastery|default(0) }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                        <small class="text-muted">{{ set.mastery|default(0) }}%</small>
+                                    </td>
+                                    <td>{{ set.last_studied|default(_('Never')) }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ set.due_cards|default(0) }}</span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Study Recommendations') }}</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% if recommendations %}
+                            {% for rec in recommendations %}
+                            <li class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h6 class="mb-1">{{ rec.title }}</h6>
+                                        <p class="text-muted mb-0">{{ rec.description }}</p>
+                                    </div>
+                                    {% if rec.action_url %}
+                                    <a href="{{ rec.action_url }}" class="btn btn-sm btn-primary">{{ rec.action_text }}</a>
+                                    {% endif %}
+                                </div>
+                            </li>
+                            {% endfor %}
+                        {% else %}
+                            <li class="list-group-item text-center py-4">
+                                <i class="fas fa-info-circle fa-2x mb-3 text-muted"></i>
+                                <h6>{{ _('No recommendations yet') }}</h6>
+                                <p class="text-muted">{{ _('Study more to get personalized recommendations.') }}</p>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5 class="mb-0">{{ _('Difficult Cards') }}</h5>
+                </div>
+                <div class="card-body">
+                    {% if difficult_cards %}
+                        <div class="list-group">
+                            {% for card in difficult_cards %}
+                            <div class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="badge bg-danger">{{ _('Difficulty') }}: {{ card.difficulty }}/10</span>
+                                    <small class="text-muted">{{ card.subject }}</small>
+                                </div>
+                                <h6 class="mb-1">{{ card.question }}</h6>
+                                <p class="mb-1 text-muted">{{ card.answer }}</p>
+                                <div class="d-flex justify-content-end mt-2">
+                                    <button class="btn btn-sm btn-outline-primary review-card-btn" data-set-id="{{ card.set_id }}" data-card-id="{{ card.id }}">
+                                        <i class="fas fa-sync-alt me-1"></i>{{ _('Review') }}
+                                    </button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-check-circle fa-2x mb-3 text-success"></i>
+                            <h6>{{ _('No difficult cards') }}</h6>
+                            <p class="text-muted">{{ _('Great job! You\'re mastering your flashcards.') }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sample data - this would be replaced with real data from the server
+    const studyData = {{ study_data|tojson }};
+    
+    // Study Activity Chart
+    const activityCtx = document.getElementById('study-activity-chart').getContext('2d');
+    const activityChart = new Chart(activityCtx, {
+        type: 'bar',
+        data: {
+            labels: studyData.activity.labels,
+            datasets: [{
+                label: '{{ _("Study Minutes") }}',
+                data: studyData.activity.data,
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }, {
+                label: '{{ _("Cards Reviewed") }}',
+                data: studyData.activity.cards_reviewed || Array(studyData.activity.labels.length).fill(0),
+                backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                yAxisID: 'y1'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '{{ _("Minutes") }}'
+                    }
+                },
+                y1: {
+                    beginAtZero: true,
+                    position: 'right',
+                    grid: {
+                        drawOnChartArea: false
+                    },
+                    title: {
+                        display: true,
+                        text: '{{ _("Cards") }}'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Subject Performance Chart
+    const subjectCtx = document.getElementById('subject-performance-chart').getContext('2d');
+    const subjectChart = new Chart(subjectCtx, {
+        type: 'radar',
+        data: {
+            labels: studyData.subjects.labels,
+            datasets: [{
+                label: '{{ _("Mastery Level") }}',
+                data: studyData.subjects.data,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: {
+                        display: true
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 100
+                }
+            }
+        }
+    });
+    
+    // Learning Progress Chart
+    const progressCtx = document.getElementById('learning-progress-chart').getContext('2d');
+    const progressChart = new Chart(progressCtx, {
+        type: 'line',
+        data: {
+            labels: studyData.progress.labels,
+            datasets: [{
+                label: '{{ _("Cards Mastered") }}',
+                data: studyData.progress.mastered,
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+                fill: true
+            }, {
+                label: '{{ _("Cards Learning") }}',
+                data: studyData.progress.learning,
+                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                borderColor: 'rgba(255, 206, 86, 1)',
+                borderWidth: 1,
+                fill: true
+            }, {
+                label: '{{ _("Cards Not Started") }}',
+                data: studyData.progress.not_started,
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 1,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    stacked: true,
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '{{ _("Number of Cards") }}'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: '{{ _("Date") }}'
+                    }
+                }
+            }
+        }
+    });
+    
+    // Study Heatmap
+    const heatmapData = studyData.heatmap.data.map(d => ({
+        x: d.day,
+        y: d.hour,
+        v: d.value
+    }));
+    
+    const heatmapCtx = document.getElementById('study-heatmap').getContext('2d');
+    const heatmapChart = new Chart(heatmapCtx, {
+        type: 'matrix',
+        data: {
+            datasets: [{
+                label: '{{ _("Study Intensity") }}',
+                data: heatmapData,
+                backgroundColor(context) {
+                    const value = context.dataset.data[context.dataIndex].v;
+                    const alpha = Math.min(1, Math.max(0.1, value / 10));
+                    return `rgba(54, 162, 235, ${alpha})`;
+                },
+                borderWidth: 1,
+                borderColor: 'rgba(255, 255, 255, 0.2)',
+                width: ({ chart }) => (chart.chartArea || {}).width / 7 - 1,
+                height: ({ chart }) => (chart.chartArea || {}).height / 24 - 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    type: 'linear',
+                    min: 0,
+                    max: 23,
+                    ticks: {
+                        stepSize: 4,
+                        callback: value => `${value}:00`
+                    },
+                    title: {
+                        display: true,
+                        text: '{{ _("Hour of Day") }}'
+                    }
+                },
+                x: {
+                    type: 'linear',
+                    min: 0,
+                    max: 6,
+                    ticks: {
+                        stepSize: 1,
+                        callback: value => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][value]
+                    },
+                    title: {
+                        display: true,
+                        text: '{{ _("Day of Week") }}'
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        title() {
+                            return '';
+                        },
+                        label(context) {
+                            const v = context.dataset.data[context.dataIndex];
+                            const day = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][v.x];
+                            const hour = `${v.y}:00 - ${v.y + 1}:00`;
+                            return [`${day}, ${hour}`, `{{ _("Study Intensity") }}: ${v.v}/10`];
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Time period buttons
+    document.getElementById('time-week').addEventListener('click', function() {
+        updateTimePeriod('week');
+    });
+    
+    document.getElementById('time-month').addEventListener('click', function() {
+        updateTimePeriod('month');
+    });
+    
+    document.getElementById('time-year').addEventListener('click', function() {
+        updateTimePeriod('year');
+    });
+    
+    function updateTimePeriod(period) {
+        // Update active button
+        document.querySelectorAll('.btn-group .btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.getElementById(`time-${period}`).classList.add('active');
+        
+        // Fetch new data for the selected period
+        fetch(`/api/analytics/study-data?period=${period}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update overview stats
+                    document.getElementById('total-study-time').textContent = data.data.total_time;
+                    document.getElementById('cards-reviewed').textContent = data.data.cards_reviewed;
+                    document.getElementById('accuracy-rate').textContent = data.data.accuracy + '%';
+                    document.getElementById('study-streak').textContent = data.data.streak;
+                    
+                    // Update charts
+                    updateActivityChart(data.data.activity);
+                    updateSubjectChart(data.data.subjects);
+                    updateProgressChart(data.data.progress);
+                    updateHeatmapChart(data.data.heatmap);
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching analytics data:', error);
+            });
+    }
+    
+    function updateActivityChart(activityData) {
+        activityChart.data.labels = activityData.labels;
+        activityChart.data.datasets[0].data = activityData.data;
+        
+        // Handle cards reviewed data if available
+        if (activityData.cards_reviewed) {
+            activityChart.data.datasets[1].data = activityData.cards_reviewed;
+        } else {
+            activityChart.data.datasets[1].data = Array(activityData.labels.length).fill(0);
+        }
+        
+        activityChart.update();
+    }
+    
+    function updateSubjectChart(subjectData) {
+        subjectChart.data.labels = subjectData.labels;
+        
+        // Use mastery data for the radar chart
+        subjectChart.data.datasets[0].data = subjectData.data;
+        
+        // If we have additional data like time or cards, we could add them as additional datasets
+        // For now, we'll just use the mastery data
+        
+        subjectChart.update();
+    }
+    
+    function updateProgressChart(progressData) {
+        progressChart.data.labels = progressData.labels;
+        progressChart.data.datasets[0].data = progressData.mastered;
+        progressChart.data.datasets[1].data = progressData.learning;
+        progressChart.data.datasets[2].data = progressData.not_started;
+        progressChart.update();
+    }
+    
+    function updateHeatmapChart(heatmapData) {
+        // Check if we have valid heatmap data
+        if (heatmapData && heatmapData.data && Array.isArray(heatmapData.data)) {
+            const newData = heatmapData.data.map(d => ({
+                x: d.day,
+                y: d.hour,
+                v: d.value
+            }));
+            
+            heatmapChart.data.datasets[0].data = newData;
+        } else {
+            // Create empty heatmap data if none is provided
+            const emptyData = [];
+            for (let day = 0; day < 7; day++) {
+                for (let hour = 0; hour < 24; hour++) {
+                    emptyData.push({
+                        x: day,
+                        y: hour,
+                        v: 0
+                    });
+                }
+            }
+            heatmapChart.data.datasets[0].data = emptyData;
+        }
+        
+        heatmapChart.update();
+    }
+    
+    // Search functionality for flashcard sets
+    const searchInput = document.getElementById('search-sets');
+    const searchButton = document.getElementById('search-button');
+    
+    function performSearch() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const rows = document.querySelectorAll('#flashcard-sets-table tr');
+        
+        rows.forEach(row => {
+            const name = row.cells[0].textContent.toLowerCase();
+            const subject = row.cells[1].textContent.toLowerCase();
+            
+            if (name.includes(searchTerm) || subject.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    }
+    
+    searchButton.addEventListener('click', performSearch);
+    searchInput.addEventListener('keyup', function(e) {
+        if (e.key === 'Enter') {
+            performSearch();
+        }
+    });
+    
+    // Review difficult card button
+    document.querySelectorAll('.review-card-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const setId = this.getAttribute('data-set-id');
+            const cardId = this.getAttribute('data-card-id');
+            
+            // Redirect to the flashcard quiz page with the specific card
+            window.location.href = `/flashcard_quiz/${setId}?card=${cardId}`;
+        });
+    });
+});
+</script>
+{% endblock %}
