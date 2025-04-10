@@ -1,0 +1,48 @@
+# The command that runs the program. If the interpreter field is set, it will have priority and this run command will do nothing
+run = ["python3", "main.py"]
+
+# The primary language of the repl. There can be others, though!
+language = "python3"
+entrypoint = "main.py"
+
+# A list of globs that specify which files and directories should
+# be hidden in the workspace.
+hidden = ["venv", ".config", "**/__pycache__", "**/.mypy_cache", "**/*.pyc"]
+
+# Specifies which nix channel to use when building the environment.
+[nix]
+channel = "stable-22_11"
+
+[env]
+PYTHONPATH = "${REPL_HOME}"
+FLASK_APP = "main.py"
+FLASK_ENV = "production"
+
+# The command to start the interpreter.
+[interpreter]
+  [interpreter.command]
+  args = [
+    "stderred",
+    "--",
+    "prybar-python310",
+    "-q",
+    "--ps1",
+    "\u0001\u001b[33m\u0002\u0001\u001b[00m\u0002 ",
+    "-i",
+  ]
+  env = { LD_LIBRARY_PATH = "$PYTHON_LD_LIBRARY_PATH" }
+
+[languages]
+
+[languages.python3]
+pattern = "**/*.py"
+
+[languages.python3.languageServer]
+start = "pylsp"
+
+[unitTest]
+language = "python3"
+
+[deployment]
+run = ["sh", "-c", "python3 main.py"]
+deploymentTarget = "cloudrun"
